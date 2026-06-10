@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI Kitchen ADK Demo Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, "Microsoft JhengHei", sans-serif;
+      background: #f5f6fa;
+      margin: 0;
+      padding: 24px;
+      color: #222;
+    }
+
+    h1 {
+      margin-bottom: 4px;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 24px;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: bold;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 18px;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: #2563eb;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    button:disabled {
+      background: #999;
+      cursor: not-allowed;
+    }
+
+    .status-success {
+      color: #15803d;
+      font-weight: bold;
+    }
+
+    .status-failed {
+      color: #b91c1c;
+      font-weight: bold;
+    }
+
+    .status-pending {
+      color: #92400e;
+      font-weight: bold;
+    }
+
+    .flow {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .agent-box {
+      border: 1px solid #ddd;
+      border-left: 6px solid #999;
+      border-radius: 10px;
+      padding: 14px;
+      background: #fafafa;
+    }
+
+    .agent-box.success {
+      border-left-color: #22c55e;
+      background: #f0fdf4;
+    }
+
+    .agent-box.failed {
+      border-left-color: #ef4444;
+      background: #fef2f2;
+    }
+
+    .agent-title {
+      font-size: 17px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .agent-detail {
+      margin: 4px 0;
+      color: #444;
+      line-height: 1.5;
+    }
+
+    .task-list {
+      margin-top: 8px;
+      padding-left: 18px;
+    }
+
+    .task-list li {
+      margin-bottom: 6px;
+    }
+
+    .log-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 14px;
+    }
+
+    .log-table th,
+    .log-table td {
+      border-bottom: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .log-table th {
+      background: #f1f5f9;
+    }
+
+    .loading {
+      padding: 16px;
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      border-radius: 10px;
+      color: #9a3412;
+      margin-bottom: 16px;
+    }
+
+    .empty {
+      color: #777;
+      padding: 12px 0;
+    }
+
+    .summary {
+      font-size: 18px;
+      padding: 12px;
+      border-radius: 10px;
+      background: #f8fafc;
+      margin-bottom: 16px;
+    }
+
+    .small-text {
+      color: #666;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .raw-toggle {
+      background: #475569;
+      margin-top: 10px;
+    }
+
+    pre {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 14px;
+      border-radius: 10px;
+      overflow-x: auto;
+      font-size: 13px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>AI Kitchen ADK Demo Dashboard</h1>
+  <div class="subtitle">
+    前端下單 → DataQueryAgent → PlannerAgent → ExecutorAgent → NotifyAgent → SQLite Logs
+  </div>
+
+  <div class="container">
+    <div>
+      <div class="card">
+        <h2>建立訂單</h2>
+
+        <label>顧客 ID</label>
+        <input id="customerId" value="C001" />
+
+        <label>品項</label>
+        <select id="itemName">
+          <option value="雞排">雞排</option>
+          <option value="薯條">薯條</option>
+          <option value="不存在品項">不存在品項</option>
+        </select>
+
+        <label>數量</label>
+        <input id="quantity" type="number" value="1" min="1" />
+
+        <label>顧客偏好</label>
+        <input id="preference" value="酥一點" />
+
+        <button id="submitBtn" onclick="submitOrder()">送出訂單並執行 Workflow</button>
+
+        <p class="small-text">
+          建議先測試：雞排 / 數量 1 / 酥一點。<br />
+          如果要測失敗情境，可以選「不存在品項」。
+        </p>
+      </div>
+      <div class="card">
+        <h2>Demo 情境控制</h2>
+      
+        <button onclick="setScenario('/demo/reset')">
+          恢復正常情境
+        </button>
+      
+        <button onclick="setScenario('/demo/set-inventory-low')" style="background:#dc2626;">
+          設定庫存不足
+        </button>
+      
+        <button onclick="setScenario('/demo/set-equipment-down')" style="background:#f97316;">
+          設定設備維修
+        </button>
+      
+        <div id="scenarioMessage" class="small-text" style="margin-top:12px;">
+          目前尚未切換情境
+        </div>
+      
+        <div id="demoStatus" class="small-text" style="margin-top:12px;">
+          尚未讀取狀態
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>目前訂單</h2>
+        <div id="orderInfo" class="empty">尚未送出訂單</div>
+      </div>
+    </div>
+
+    <div>
+      <div id="loadingBox" class="loading" style="display:none;">
+        Workflow 執行中，正在呼叫 ADK Agents 與 Tools...
+      </div>
+
+      <div class="card">
+        <h2>Workflow 執行結果</h2>
+        <div id="summary" class="summary">尚未執行</div>
+        <div id="workflowResult" class="flow"></div>
+      </div>
+
+      <div class="card">
+        <h2>Agent / Tool 執行紀錄</h2>
+        <div id="logs">尚無 logs</div>
+      </div>
+
+      <div class="card">
+        <h2>原始回傳資料</h2>
+        <button class="raw-toggle" onclick="toggleRaw()">顯示 / 隱藏 Raw JSON</button>
+        <pre id="rawJson" style="display:none;"></pre>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let lastRawData = null;
+    async function setScenario(apiPath) {
+    const scenarioMessage = document.getElementById("scenarioMessage");
+
+    try {
+        scenarioMessage.innerHTML = `<span class="status-pending">正在切換情境...</span>`;
+
+        const res = await fetch(apiPath, {
+        method: "POST"
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+        scenarioMessage.innerHTML =
+            `<span class="status-success">${data.message}</span>`;
+        } else {
+        scenarioMessage.innerHTML =
+            `<span class="status-failed">情境切換失敗</span>`;
+        }
+
+        await loadDemoStatus();
+    } catch (err) {
+        scenarioMessage.innerHTML =
+        `<span class="status-failed">情境切換錯誤：${err.message}</span>`;
+    }
+    }
+
+
+    async function loadDemoStatus() {
+    const demoStatus = document.getElementById("demoStatus");
+
+    try {
+        const res = await fetch("/demo/status");
+        const data = await res.json();
+
+        const inventory = data.inventory || [];
+        const equipment = data.equipment || [];
+
+        const inventoryHtml = inventory.map(item => {
+        return `${item.item_name}：${item.stock_qty} ${item.unit}`;
+        }).join("<br>");
+
+        const equipmentHtml = equipment.map(eq => {
+        const statusClassName = eq.status === "available"
+            ? "status-success"
+            : "status-failed";
+
+        return `${eq.equipment_name}：<span class="${statusClassName}">${eq.status}</span>`;
+        }).join("<br>");
+
+        demoStatus.innerHTML = `
+        <div style="margin-top:8px;">
+            <strong>目前庫存</strong><br>
+            ${inventoryHtml}
+        </div>
+        <div style="margin-top:8px;">
+            <strong>目前設備</strong><br>
+            ${equipmentHtml}
+        </div>
+        `;
+    } catch (err) {
+        demoStatus.innerHTML =
+        `<span class="status-failed">讀取 demo 狀態失敗：${err.message}</span>`;
+    }
+    }
+    function statusText(success) {
+      return success ? "成功" : "失敗";
+    }
+
+    function statusClass(success) {
+      return success ? "status-success" : "status-failed";
+    }
+
+    function agentBox(title, success, detailsHtml) {
+      const cls = success ? "success" : "failed";
+      const status = success
+        ? `<span class="status-success">成功</span>`
+        : `<span class="status-failed">失敗</span>`;
+
+      return `
+        <div class="agent-box ${cls}">
+          <div class="agent-title">${title}：${status}</div>
+          ${detailsHtml}
+        </div>
+      `;
+    }
+
+    function renderWorkflow(data) {
+      const resultDiv = document.getElementById("workflowResult");
+      const summaryDiv = document.getElementById("summary");
+
+      if (!data) {
+        resultDiv.innerHTML = "";
+        summaryDiv.innerText = "尚未執行";
+        return;
+      }
+
+      const success = data.success === true;
+
+      summaryDiv.innerHTML = success
+        ? `<span class="status-success">訂單完成：</span>${data.message || "Workflow 成功完成"}`
+        : `<span class="status-failed">訂單失敗：</span>${data.reason || "Workflow 執行失敗"}`;
+
+      const dq = data.data_query_result || {};
+      const inventory = dq.inventory_check || {};
+      const equipment = dq.equipment_check || {};
+      const sop = dq.sop_check || {};
+      const plan = data.plan || {};
+      const execution = data.execution_result || {};
+      const notify = data.notify_result || {};
+
+      let html = "";
+
+      html += agentBox(
+        "DataQueryAgent 資料查詢",
+        dq.query_status === "success" || (inventory.success && equipment.success && sop.success),
+        `
+          <div class="agent-detail">Inventory Tool：<span class="${statusClass(inventory.success)}">${statusText(inventory.success)}</span> - ${inventory.message || ""}</div>
+          <div class="agent-detail">Equipment Tool：<span class="${statusClass(equipment.success)}">${statusText(equipment.success)}</span> - ${equipment.message || ""}</div>
+          <div class="agent-detail">SOP Tool：<span class="${statusClass(sop.success)}">${statusText(sop.success)}</span> - ${sop.message || ""}</div>
+          <div class="agent-detail">偏好處理：${sop.preference_note || "無"}</div>
+        `
+      );
+
+      const tasks = plan.tasks || [];
+      const taskHtml = tasks.length > 0
+        ? `
+          <ul class="task-list">
+            ${tasks.map(task => `
+              <li>
+                ${task.task_id || ""}：
+                ${task.device || ""} → ${task.action || ""}
+                (${task.duration_sec || 0} 秒)
+              </li>
+            `).join("")}
+          </ul>
+        `
+        : `<div class="agent-detail">尚無任務</div>`;
+
+        if (data.stage && data.stage !== "planning" && !data.plan) {
+            html += `
+                <div class="agent-box">
+                <div class="agent-title">PlannerAgent 任務規劃：<span class="status-pending">未執行</span></div>
+                <div class="agent-detail">前一階段失敗，因此未進入任務規劃。</div>
+                </div>
+            `;
+            } else {
+            html += agentBox(
+                "PlannerAgent 任務規劃",
+                plan.plan_status === "ready",
+                `
+                <div class="agent-detail">規劃狀態：${plan.plan_status || "無"}</div>
+                <div class="agent-detail">原因：${plan.reason || "無"}</div>
+                <div class="agent-detail">產生任務數：${tasks.length}</div>
+                ${taskHtml}
+                `
+            );
+            }
+
+      const execResults = execution.results || [];
+      const execHtml = execResults.length > 0
+        ? `
+          <ul class="task-list">
+            ${execResults.map(result => `
+              <li>
+                ${result.task_id || ""}：
+                <span class="${statusClass(result.success)}">${statusText(result.success)}</span>
+                - ${result.device || ""} 執行 ${result.action || ""}
+                (${result.duration_sec || 0} 秒)
+              </li>
+            `).join("")}
+          </ul>
+        `
+        : `<div class="agent-detail">尚無執行結果</div>`;
+
+        if (!data.execution_result) {
+            html += `
+                <div class="agent-box">
+                <div class="agent-title">ExecutorAgent 設備執行：<span class="status-pending">未執行</span></div>
+                <div class="agent-detail">前一階段尚未完成，因此未進入設備執行。</div>
+                </div>
+            `;
+            } else {
+            html += agentBox(
+                "ExecutorAgent 設備執行",
+                execution.execution_status === "completed",
+                `
+                <div class="agent-detail">執行狀態：${execution.execution_status || "無"}</div>
+                <div class="agent-detail">訊息：${execution.message || "無"}</div>
+                ${execHtml}
+                `
+            );
+            }
+
+      const notification = notify.notification || {};
+
+      if (!data.notify_result) {
+        html += `
+            <div class="agent-box">
+            <div class="agent-title">NotifyAgent 顧客通知：<span class="status-pending">未執行</span></div>
+            <div class="agent-detail">前一階段尚未完成，因此未通知顧客。</div>
+            </div>
+        `;
+        } else {
+        const notification = notify.notification || {};
+
+        html += agentBox(
+            "NotifyAgent 顧客通知",
+            notify.notify_status === "sent",
+            `
+            <div class="agent-detail">通知狀態：${notify.notify_status || "無"}</div>
+            <div class="agent-detail">通知訊息：${notification.message || notify.message || "無"}</div>
+            `
+        );
+        }
+
+      resultDiv.innerHTML = html;
+    }
+
+    function renderOrderInfo(data) {
+      const orderInfo = document.getElementById("orderInfo");
+
+      if (!data || !data.order_id) {
+        orderInfo.innerHTML = "尚未送出訂單";
+        return;
+      }
+
+      orderInfo.innerHTML = `
+        <div>訂單 ID：<strong>${data.order_id}</strong></div>
+        <div>狀態：
+          ${data.success
+            ? '<span class="status-success">完成</span>'
+            : '<span class="status-failed">失敗</span>'}
+        </div>
+      `;
+    }
+
+    async function loadLogs(orderId) {
+      const logsDiv = document.getElementById("logs");
+
+      if (!orderId) {
+        logsDiv.innerHTML = "尚無 logs";
+        return;
+      }
+
+      try {
+        const res = await fetch(`/orders/${orderId}/logs`);
+        const data = await res.json();
+        const logs = data.logs || [];
+
+        if (logs.length === 0) {
+          logsDiv.innerHTML = `<div class="empty">目前沒有執行紀錄</div>`;
+          return;
+        }
+
+        logsDiv.innerHTML = `
+          <table class="log-table">
+            <thead>
+              <tr>
+                <th>Agent</th>
+                <th>Action</th>
+                <th>Status</th>
+                <th>Message</th>
+                <th>Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${logs.map(log => `
+                <tr>
+                  <td>${log.agent_name || ""}</td>
+                  <td>${log.action || ""}</td>
+                  <td>
+                    <span class="${log.status === "success" ? "status-success" : "status-failed"}">
+                      ${log.status || ""}
+                    </span>
+                  </td>
+                  <td>${log.message || ""}</td>
+                  <td>${log.created_at || ""}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        `;
+      } catch (err) {
+        logsDiv.innerHTML = `<span class="status-failed">讀取 logs 失敗：${err.message}</span>`;
+      }
+    }
+
+    async function submitOrder() {
+      const submitBtn = document.getElementById("submitBtn");
+      const loadingBox = document.getElementById("loadingBox");
+      const rawJson = document.getElementById("rawJson");
+
+      const payload = {
+        customer_id: document.getElementById("customerId").value,
+        item_name: document.getElementById("itemName").value,
+        quantity: Number(document.getElementById("quantity").value),
+        preference: document.getElementById("preference").value
+      };
+
+      submitBtn.disabled = true;
+      loadingBox.style.display = "block";
+      document.getElementById("summary").innerHTML = `<span class="status-pending">執行中...</span>`;
+      document.getElementById("workflowResult").innerHTML = "";
+      document.getElementById("logs").innerHTML = "等待執行完成後讀取 logs...";
+
+      try {
+        const res = await fetch("/order", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        lastRawData = data;
+
+        renderOrderInfo(data);
+        renderWorkflow(data);
+
+        rawJson.textContent = JSON.stringify(data, null, 2);
+
+        if (data.order_id) {
+          await loadLogs(data.order_id);
+        }
+      } catch (err) {
+        document.getElementById("summary").innerHTML =
+          `<span class="status-failed">前端或後端錯誤：</span>${err.message}`;
+      } finally {
+        submitBtn.disabled = false;
+        loadingBox.style.display = "none";
+      }
+    }
+
+    function toggleRaw() {
+      const rawJson = document.getElementById("rawJson");
+      rawJson.style.display = rawJson.style.display === "none" ? "block" : "none";
+    }
+    window.addEventListener("load", () => {
+        loadDemoStatus();
+        });
+  </script>
+</body>
+</html>
