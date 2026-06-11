@@ -30,3 +30,7 @@ Thumbs.db
 # Generated files
 *.sqlite3
 *.db
+
+
+#archive
+archive/

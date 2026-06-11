@@ -1,5 +1,5 @@
 # agents/adk_runner.py
-import re
+
 import json
 import uuid
 from typing import Any
@@ -15,6 +15,7 @@ APP_NAME = "ai_kitchen_adk_mvp"
 async def run_agent(agent, user_input: dict | str) -> str:
     """
     執行一個 ADK agent，並回傳最後的文字輸出。
+    這個 function 可用於 LlmAgent，也可用於 SequentialAgent root_agent。
     """
 
     session_service = InMemorySessionService()
@@ -55,27 +56,19 @@ async def run_agent(agent, user_input: dict | str) -> str:
     ):
         if event.is_final_response():
             if event.content and event.content.parts:
-                final_text = event.content.parts[0].text
+                final_text = event.content.parts[0].text or ""
 
     return final_text
 
 
 def safe_json_loads(text: str) -> dict[str, Any]:
-    if text is None:
-        raise ValueError("模型回傳 None，無法解析 JSON")
+    """
+    防止模型偶爾輸出 ```json 或額外文字。
+    這裡會盡量抓出第一個 JSON object。
+    """
 
     cleaned = text.strip()
 
-    if not cleaned:
-        raise ValueError("模型回傳空字串，無法解析 JSON")
-
-    # 第一層：如果本來就是合法 JSON，直接解析
-    try:
-        return json.loads(cleaned)
-    except json.JSONDecodeError:
-        pass
-
-    # 第二層：處理 markdown code block
     if cleaned.startswith("```json"):
         cleaned = cleaned.replace("```json", "", 1).strip()
 
@@ -85,15 +78,11 @@ def safe_json_loads(text: str) -> dict[str, Any]:
     if cleaned.endswith("```"):
         cleaned = cleaned[:-3].strip()
 
-    try:
-        return json.loads(cleaned)
-    except json.JSONDecodeError:
-        pass
+    # 如果模型前後多輸出文字，嘗試擷取第一個 JSON object
+    start = cleaned.find("{")
+    end = cleaned.rfind("}")
 
-    # 第三層：最後才嘗試從文字中抓 JSON object
-    match = re.search(r"\{[\s\S]*\}", cleaned)
-    if match:
-        cleaned = match.group(0)
-        return json.loads(cleaned)
+    if start != -1 and end != -1 and end > start:
+        cleaned = cleaned[start:end + 1]
 
-    raise ValueError(f"找不到可解析的 JSON：{repr(text)}")
+    return json.loads(cleaned)
