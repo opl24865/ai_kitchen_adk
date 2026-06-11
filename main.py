@@ -1,5 +1,5 @@
 # main.py
-
+import requests
 from fastapi import FastAPI
 from pydantic import BaseModel
 from uuid import uuid4
@@ -13,6 +13,8 @@ from agents.executor_agent import executor_agent
 from agents.notify_agent import notify_agent
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+from config import ROBOT_SERVER_URL
+
 
 app = FastAPI(title="AI Kitchen ADK MVP")
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -328,12 +330,35 @@ def demo_status():
         "SELECT item_name, stock_qty, unit FROM inventory ORDER BY item_name"
     )
 
-    equipment = fetch_all(
+    sqlite_equipment = fetch_all(
         "SELECT equipment_id, equipment_name, status FROM equipment ORDER BY equipment_id"
     )
 
+    robot_server = {
+        "success": False,
+        "device_state": {},
+        "message": "尚未取得 Robot Server 狀態"
+    }
+
+    try:
+        response = requests.get(
+            f"{ROBOT_SERVER_URL}/device/status",
+            timeout=5
+        )
+        response.raise_for_status()
+        robot_server = response.json()
+
+    except requests.RequestException as e:
+        robot_server = {
+            "success": False,
+            "device_state": {},
+            "message": f"Robot Server 連線失敗：{str(e)}"
+        }
+
     return {
         "success": True,
+        "robot_server_url": ROBOT_SERVER_URL,
         "inventory": inventory,
-        "equipment": equipment
+        "sqlite_equipment": sqlite_equipment,
+        "robot_server": robot_server
     }

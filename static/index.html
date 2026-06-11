@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>AI Kitchen ADK Demo Dashboard</title>
+
   <style>
     body {
       font-family: Arial, "Microsoft JhengHei", sans-serif;
@@ -42,7 +43,8 @@
       font-weight: bold;
     }
 
-    input, select {
+    input,
+    select {
       width: 100%;
       padding: 10px;
       margin-top: 6px;
@@ -73,6 +75,30 @@
       cursor: not-allowed;
     }
 
+    .btn-danger {
+      background: #dc2626;
+    }
+
+    .btn-danger:hover {
+      background: #b91c1c;
+    }
+
+    .btn-warning {
+      background: #f97316;
+    }
+
+    .btn-warning:hover {
+      background: #ea580c;
+    }
+
+    .btn-gray {
+      background: #475569;
+    }
+
+    .btn-gray:hover {
+      background: #334155;
+    }
+
     .status-success {
       color: #15803d;
       font-weight: bold;
@@ -85,6 +111,11 @@
 
     .status-pending {
       color: #92400e;
+      font-weight: bold;
+    }
+
+    .status-muted {
+      color: #64748b;
       font-weight: bold;
     }
 
@@ -112,6 +143,11 @@
       background: #fef2f2;
     }
 
+    .agent-box.pending {
+      border-left-color: #f59e0b;
+      background: #fffbeb;
+    }
+
     .agent-title {
       font-size: 17px;
       font-weight: bold;
@@ -124,6 +160,19 @@
       line-height: 1.5;
     }
 
+    .sub-section {
+      margin-top: 10px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.65);
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+    }
+
+    .sub-title {
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+
     .task-list {
       margin-top: 8px;
       padding-left: 18px;
@@ -131,6 +180,22 @@
 
     .task-list li {
       margin-bottom: 6px;
+      line-height: 1.5;
+    }
+
+    .device-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .device-pill {
+      padding: 8px;
+      border-radius: 8px;
+      background: white;
+      border: 1px solid #ddd;
+      font-size: 14px;
     }
 
     .log-table {
@@ -172,17 +237,13 @@
       border-radius: 10px;
       background: #f8fafc;
       margin-bottom: 16px;
+      line-height: 1.6;
     }
 
     .small-text {
       color: #666;
       font-size: 13px;
       line-height: 1.5;
-    }
-
-    .raw-toggle {
-      background: #475569;
-      margin-top: 10px;
     }
 
     pre {
@@ -195,13 +256,37 @@
       overflow-x: auto;
       font-size: 13px;
     }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: #e2e8f0;
+      margin-left: 4px;
+    }
+
+    .badge-green {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .badge-red {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .badge-orange {
+      background: #ffedd5;
+      color: #9a3412;
+    }
   </style>
 </head>
 
 <body>
   <h1>AI Kitchen ADK Demo Dashboard</h1>
   <div class="subtitle">
-    前端下單 → DataQueryAgent → PlannerAgent → ExecutorAgent → NotifyAgent → SQLite Logs
+    前端下單 → DataQueryAgent 查詢 Robot Server / SQLite → PlannerAgent 選設備 → ExecutorAgent 呼叫 Robot Server → NotifyAgent 通知顧客
   </div>
 
   <div class="container">
@@ -228,32 +313,37 @@
         <button id="submitBtn" onclick="submitOrder()">送出訂單並執行 Workflow</button>
 
         <p class="small-text">
-          建議先測試：雞排 / 數量 1 / 酥一點。<br />
-          如果要測失敗情境，可以選「不存在品項」。
+          建議測試：雞排 / 數量 1 / 酥一點。<br />
+          若 Robot Server 狀態是 fryer_A 維修、fryer_B 忙碌、fryer_C 可用，PlannerAgent 應該選擇 fryer_C。
         </p>
       </div>
+
       <div class="card">
         <h2>Demo 情境控制</h2>
-      
+
         <button onclick="setScenario('/demo/reset')">
           恢復正常情境
         </button>
-      
-        <button onclick="setScenario('/demo/set-inventory-low')" style="background:#dc2626;">
+
+        <button class="btn-danger" onclick="setScenario('/demo/set-inventory-low')">
           設定庫存不足
         </button>
-      
-        <button onclick="setScenario('/demo/set-equipment-down')" style="background:#f97316;">
+
+        <button class="btn-warning" onclick="setScenario('/demo/set-equipment-down')">
           設定設備維修
         </button>
-      
+
         <div id="scenarioMessage" class="small-text" style="margin-top:12px;">
           目前尚未切換情境
         </div>
-      
+
         <div id="demoStatus" class="small-text" style="margin-top:12px;">
           尚未讀取狀態
         </div>
+
+        <p class="small-text">
+          注意：如果你已經改成由 Robot Server 管理設備狀態，這些按鈕是否會影響設備狀態，取決於你的後端 `/demo/*` API 是否也有同步呼叫 Robot Server。
+        </p>
       </div>
 
       <div class="card">
@@ -264,7 +354,7 @@
 
     <div>
       <div id="loadingBox" class="loading" style="display:none;">
-        Workflow 執行中，正在呼叫 ADK Agents 與 Tools...
+        Workflow 執行中，正在呼叫 ADK Agents、Tools 與 Robot Server...
       </div>
 
       <div class="card">
@@ -280,7 +370,7 @@
 
       <div class="card">
         <h2>原始回傳資料</h2>
-        <button class="raw-toggle" onclick="toggleRaw()">顯示 / 隱藏 Raw JSON</button>
+        <button class="btn-gray" onclick="toggleRaw()">顯示 / 隱藏 Raw JSON</button>
         <pre id="rawJson" style="display:none;"></pre>
       </div>
     </div>
@@ -288,71 +378,7 @@
 
   <script>
     let lastRawData = null;
-    async function setScenario(apiPath) {
-    const scenarioMessage = document.getElementById("scenarioMessage");
 
-    try {
-        scenarioMessage.innerHTML = `<span class="status-pending">正在切換情境...</span>`;
-
-        const res = await fetch(apiPath, {
-        method: "POST"
-        });
-
-        const data = await res.json();
-
-        if (data.success) {
-        scenarioMessage.innerHTML =
-            `<span class="status-success">${data.message}</span>`;
-        } else {
-        scenarioMessage.innerHTML =
-            `<span class="status-failed">情境切換失敗</span>`;
-        }
-
-        await loadDemoStatus();
-    } catch (err) {
-        scenarioMessage.innerHTML =
-        `<span class="status-failed">情境切換錯誤：${err.message}</span>`;
-    }
-    }
-
-
-    async function loadDemoStatus() {
-    const demoStatus = document.getElementById("demoStatus");
-
-    try {
-        const res = await fetch("/demo/status");
-        const data = await res.json();
-
-        const inventory = data.inventory || [];
-        const equipment = data.equipment || [];
-
-        const inventoryHtml = inventory.map(item => {
-        return `${item.item_name}：${item.stock_qty} ${item.unit}`;
-        }).join("<br>");
-
-        const equipmentHtml = equipment.map(eq => {
-        const statusClassName = eq.status === "available"
-            ? "status-success"
-            : "status-failed";
-
-        return `${eq.equipment_name}：<span class="${statusClassName}">${eq.status}</span>`;
-        }).join("<br>");
-
-        demoStatus.innerHTML = `
-        <div style="margin-top:8px;">
-            <strong>目前庫存</strong><br>
-            ${inventoryHtml}
-        </div>
-        <div style="margin-top:8px;">
-            <strong>目前設備</strong><br>
-            ${equipmentHtml}
-        </div>
-        `;
-    } catch (err) {
-        demoStatus.innerHTML =
-        `<span class="status-failed">讀取 demo 狀態失敗：${err.message}</span>`;
-    }
-    }
     function statusText(success) {
       return success ? "成功" : "失敗";
     }
@@ -361,16 +387,61 @@
       return success ? "status-success" : "status-failed";
     }
 
-    function agentBox(title, success, detailsHtml) {
-      const cls = success ? "success" : "failed";
-      const status = success
-        ? `<span class="status-success">成功</span>`
-        : `<span class="status-failed">失敗</span>`;
+    function deviceStatusClass(status) {
+      if (status === "available") return "status-success";
+      if (status === "busy") return "status-pending";
+      if (status === "maintenance") return "status-failed";
+      return "status-muted";
+    }
+
+    function deviceBadge(status) {
+      if (status === "available") {
+        return `<span class="badge badge-green">available</span>`;
+      }
+      if (status === "busy") {
+        return `<span class="badge badge-orange">busy</span>`;
+      }
+      if (status === "maintenance") {
+        return `<span class="badge badge-red">maintenance</span>`;
+      }
+      return `<span class="badge">${status || "unknown"}</span>`;
+    }
+
+    function agentBox(title, statusType, detailsHtml) {
+      let cls = "pending";
+      let statusLabel = `<span class="status-pending">未執行</span>`;
+
+      if (statusType === "success") {
+        cls = "success";
+        statusLabel = `<span class="status-success">成功</span>`;
+      }
+
+      if (statusType === "failed") {
+        cls = "failed";
+        statusLabel = `<span class="status-failed">失敗</span>`;
+      }
 
       return `
         <div class="agent-box ${cls}">
-          <div class="agent-title">${title}：${status}</div>
+          <div class="agent-title">${title}：${statusLabel}</div>
           ${detailsHtml}
+        </div>
+      `;
+    }
+
+    function renderDeviceState(deviceState) {
+      if (!deviceState || Object.keys(deviceState).length === 0) {
+        return `<div class="agent-detail">沒有取得 Robot Server 設備狀態</div>`;
+      }
+
+      return `
+        <div class="device-grid">
+          ${Object.entries(deviceState).map(([deviceId, status]) => `
+            <div class="device-pill">
+              <strong>${deviceId}</strong><br />
+              ${deviceBadge(status)}
+            </div>
+          `).join("")}
         </div>
       `;
     }
@@ -385,41 +456,92 @@
         return;
       }
 
-      const success = data.success === true;
-
-      summaryDiv.innerHTML = success
-        ? `<span class="status-success">訂單完成：</span>${data.message || "Workflow 成功完成"}`
-        : `<span class="status-failed">訂單失敗：</span>${data.reason || "Workflow 執行失敗"}`;
+      if (data.success === true) {
+        summaryDiv.innerHTML = `
+          <span class="status-success">訂單完成：</span>
+          ${data.message || "Workflow 成功完成"}
+        `;
+      } else {
+        summaryDiv.innerHTML = `
+          <span class="status-failed">訂單失敗：</span>
+          ${data.reason || "Workflow 執行失敗"}
+          <br />
+          <span class="small-text">失敗階段：${data.stage || "未知"}</span>
+        `;
+      }
 
       const dq = data.data_query_result || {};
       const inventory = dq.inventory_check || {};
       const equipment = dq.equipment_check || {};
       const sop = dq.sop_check || {};
+
       const plan = data.plan || {};
       const execution = data.execution_result || {};
       const notify = data.notify_result || {};
 
       let html = "";
 
+      const dataQuerySuccess =
+        dq.query_status === "success" ||
+        (inventory.success && equipment.success && sop.success);
+
       html += agentBox(
         "DataQueryAgent 資料查詢",
-        dq.query_status === "success" || (inventory.success && equipment.success && sop.success),
+        dataQuerySuccess ? "success" : "failed",
         `
-          <div class="agent-detail">Inventory Tool：<span class="${statusClass(inventory.success)}">${statusText(inventory.success)}</span> - ${inventory.message || ""}</div>
-          <div class="agent-detail">Equipment Tool：<span class="${statusClass(equipment.success)}">${statusText(equipment.success)}</span> - ${equipment.message || ""}</div>
-          <div class="agent-detail">SOP Tool：<span class="${statusClass(sop.success)}">${statusText(sop.success)}</span> - ${sop.message || ""}</div>
-          <div class="agent-detail">偏好處理：${sop.preference_note || "無"}</div>
+          <div class="agent-detail">
+            Inventory Tool：
+            <span class="${statusClass(inventory.success)}">${statusText(inventory.success)}</span>
+            - ${inventory.message || ""}
+          </div>
+
+          <div class="agent-detail">
+            Equipment Tool：
+            <span class="${statusClass(equipment.success)}">${statusText(equipment.success)}</span>
+            - ${equipment.message || ""}
+          </div>
+
+          <div class="agent-detail">
+            SOP Tool：
+            <span class="${statusClass(sop.success)}">${statusText(sop.success)}</span>
+            - ${sop.message || ""}
+          </div>
+
+          <div class="sub-section">
+            <div class="sub-title">Robot Server 即時設備狀態</div>
+            ${renderDeviceState(equipment.device_state)}
+          </div>
+
+          <div class="sub-section">
+            <div class="sub-title">可用設備清單</div>
+            <div class="agent-detail">
+              可用炸鍋：
+              <strong>${(equipment.available_fryers || []).join(", ") || "無"}</strong>
+            </div>
+            <div class="agent-detail">
+              可用機械手臂：
+              <strong>${(equipment.available_robot_arms || []).join(", ") || "無"}</strong>
+            </div>
+          </div>
+
+          <div class="agent-detail">
+            偏好處理：${sop.preference_note || "無"}
+          </div>
         `
       );
 
       const tasks = plan.tasks || [];
+      const selectedEquipment = plan.selected_equipment || {};
+
       const taskHtml = tasks.length > 0
         ? `
           <ul class="task-list">
             ${tasks.map(task => `
               <li>
-                ${task.task_id || ""}：
-                ${task.device || ""} → ${task.action || ""}
+                <strong>${task.task_id || ""}</strong>：
+                <span>${task.device || "未指定設備"}</span>
+                →
+                <span>${task.action || ""}</span>
                 (${task.duration_sec || 0} 秒)
               </li>
             `).join("")}
@@ -427,82 +549,115 @@
         `
         : `<div class="agent-detail">尚無任務</div>`;
 
-        if (data.stage && data.stage !== "planning" && !data.plan) {
-            html += `
-                <div class="agent-box">
-                <div class="agent-title">PlannerAgent 任務規劃：<span class="status-pending">未執行</span></div>
-                <div class="agent-detail">前一階段失敗，因此未進入任務規劃。</div>
-                </div>
-            `;
-            } else {
-            html += agentBox(
-                "PlannerAgent 任務規劃",
-                plan.plan_status === "ready",
-                `
-                <div class="agent-detail">規劃狀態：${plan.plan_status || "無"}</div>
-                <div class="agent-detail">原因：${plan.reason || "無"}</div>
-                <div class="agent-detail">產生任務數：${tasks.length}</div>
-                ${taskHtml}
-                `
-            );
-            }
+      if (!data.plan) {
+        html += agentBox(
+          "PlannerAgent 任務規劃",
+          "pending",
+          `
+            <div class="agent-detail">
+              前一階段失敗，因此未進入任務規劃。
+            </div>
+          `
+        );
+      } else {
+        html += agentBox(
+          "PlannerAgent 任務規劃",
+          plan.plan_status === "ready" ? "success" : "failed",
+          `
+            <div class="agent-detail">規劃狀態：${plan.plan_status || "無"}</div>
+            <div class="agent-detail">原因：${plan.reason || "無"}</div>
+
+            <div class="sub-section">
+              <div class="sub-title">PlannerAgent 選擇的設備</div>
+              <div class="agent-detail">
+                選擇炸鍋：
+                <strong>${selectedEquipment.fryer || "未選擇"}</strong>
+              </div>
+              <div class="agent-detail">
+                選擇機械手臂：
+                <strong>${selectedEquipment.robot_arm || "未選擇"}</strong>
+              </div>
+            </div>
+
+            <div class="agent-detail">產生任務數：${tasks.length}</div>
+            ${taskHtml}
+          `
+        );
+      }
 
       const execResults = execution.results || [];
+
       const execHtml = execResults.length > 0
         ? `
           <ul class="task-list">
             ${execResults.map(result => `
               <li>
-                ${result.task_id || ""}：
+                <strong>${result.task_id || ""}</strong>：
                 <span class="${statusClass(result.success)}">${statusText(result.success)}</span>
-                - ${result.device || ""} 執行 ${result.action || ""}
+                -
+                ${result.device || ""} 執行 ${result.action || ""}
                 (${result.duration_sec || 0} 秒)
+                <br />
+                <span class="small-text">
+                  Robot Server 回覆：${result.message || ""}
+                  ${result.robot_server_time ? `｜時間：${result.robot_server_time}` : ""}
+                </span>
               </li>
             `).join("")}
           </ul>
         `
         : `<div class="agent-detail">尚無執行結果</div>`;
 
-        if (!data.execution_result) {
-            html += `
-                <div class="agent-box">
-                <div class="agent-title">ExecutorAgent 設備執行：<span class="status-pending">未執行</span></div>
-                <div class="agent-detail">前一階段尚未完成，因此未進入設備執行。</div>
-                </div>
-            `;
-            } else {
-            html += agentBox(
-                "ExecutorAgent 設備執行",
-                execution.execution_status === "completed",
-                `
-                <div class="agent-detail">執行狀態：${execution.execution_status || "無"}</div>
-                <div class="agent-detail">訊息：${execution.message || "無"}</div>
-                ${execHtml}
-                `
-            );
-            }
+      if (!data.execution_result) {
+        html += agentBox(
+          "ExecutorAgent 設備執行",
+          "pending",
+          `
+            <div class="agent-detail">
+              前一階段尚未完成，因此未進入設備執行。
+            </div>
+          `
+        );
+      } else {
+        html += agentBox(
+          "ExecutorAgent 設備執行",
+          execution.execution_status === "completed" ? "success" : "failed",
+          `
+            <div class="agent-detail">執行狀態：${execution.execution_status || "無"}</div>
+            <div class="agent-detail">訊息：${execution.message || "無"}</div>
 
-      const notification = notify.notification || {};
+            <div class="sub-section">
+              <div class="sub-title">Robot Server 執行結果</div>
+              ${execHtml}
+            </div>
+          `
+        );
+      }
 
       if (!data.notify_result) {
-        html += `
-            <div class="agent-box">
-            <div class="agent-title">NotifyAgent 顧客通知：<span class="status-pending">未執行</span></div>
-            <div class="agent-detail">前一階段尚未完成，因此未通知顧客。</div>
+        html += agentBox(
+          "NotifyAgent 顧客通知",
+          "pending",
+          `
+            <div class="agent-detail">
+              前一階段尚未完成，因此未通知顧客。
             </div>
-        `;
-        } else {
+          `
+        );
+      } else {
         const notification = notify.notification || {};
 
         html += agentBox(
-            "NotifyAgent 顧客通知",
-            notify.notify_status === "sent",
-            `
+          "NotifyAgent 顧客通知",
+          notify.notify_status === "sent" ? "success" : "failed",
+          `
             <div class="agent-detail">通知狀態：${notify.notify_status || "無"}</div>
-            <div class="agent-detail">通知訊息：${notification.message || notify.message || "無"}</div>
-            `
+            <div class="agent-detail">
+              通知訊息：${notification.message || notify.message || "無"}
+            </div>
+          `
         );
-        }
+      }
 
       resultDiv.innerHTML = html;
     }
@@ -517,10 +672,16 @@
 
       orderInfo.innerHTML = `
         <div>訂單 ID：<strong>${data.order_id}</strong></div>
-        <div>狀態：
-          ${data.success
-            ? '<span class="status-success">完成</span>'
-            : '<span class="status-failed">失敗</span>'}
+        <div>
+          狀態：
+          ${
+            data.success
+              ? '<span class="status-success">完成</span>'
+              : '<span class="status-failed">失敗</span>'
+          }
+        </div>
+        <div class="small-text">
+          ${data.message || data.reason || ""}
         </div>
       `;
     }
@@ -572,7 +733,101 @@
           </table>
         `;
       } catch (err) {
-        logsDiv.innerHTML = `<span class="status-failed">讀取 logs 失敗：${err.message}</span>`;
+        logsDiv.innerHTML = `
+          <span class="status-failed">
+            讀取 logs 失敗：${err.message}
+          </span>
+        `;
+      }
+    }
+
+    async function setScenario(apiPath) {
+      const scenarioMessage = document.getElementById("scenarioMessage");
+
+      try {
+        scenarioMessage.innerHTML = `
+          <span class="status-pending">正在切換情境...</span>
+        `;
+
+        const res = await fetch(apiPath, {
+          method: "POST"
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          scenarioMessage.innerHTML = `
+            <span class="status-success">${data.message}</span>
+          `;
+        } else {
+          scenarioMessage.innerHTML = `
+            <span class="status-failed">情境切換失敗</span>
+          `;
+        }
+
+        await loadDemoStatus();
+      } catch (err) {
+        scenarioMessage.innerHTML = `
+          <span class="status-failed">
+            情境切換錯誤：${err.message}
+          </span>
+        `;
+      }
+    }
+
+    async function loadDemoStatus() {
+      const demoStatus = document.getElementById("demoStatus");
+
+      try {
+        const res = await fetch("/demo/status");
+        const data = await res.json();
+
+        const inventory = data.inventory || [];
+        const robotServer = data.robot_server || {};
+        const deviceState = robotServer.device_state || {};
+        const robotServerUrl = data.robot_server_url || "";
+
+        const inventoryHtml = inventory.length > 0
+          ? inventory.map(item => {
+              return `${item.item_name}：${item.stock_qty} ${item.unit}`;
+            }).join("<br>")
+          : "無庫存資料";
+
+        const deviceHtml = Object.keys(deviceState).length > 0
+          ? Object.entries(deviceState).map(([deviceId, status]) => {
+              return `
+                <div class="device-pill">
+                  <strong>${deviceId}</strong><br>
+                  ${deviceBadge(status)}
+                </div>
+              `;
+            }).join("")
+          : `<span class="status-failed">${robotServer.message || "沒有取得 Robot Server 設備狀態"}</span>`;
+
+        demoStatus.innerHTML = `
+          <div style="margin-top:8px;">
+            <strong>目前庫存</strong><br>
+            ${inventoryHtml}
+          </div>
+
+          <div style="margin-top:12px;">
+            <strong>Robot Server</strong><br>
+            <span class="small-text">${robotServerUrl}</span>
+          </div>
+
+          <div style="margin-top:12px;">
+            <strong>Robot Server 即時設備狀態</strong>
+            <div class="device-grid" style="margin-top:8px;">
+              ${deviceHtml}
+            </div>
+          </div>
+        `;
+      } catch (err) {
+        demoStatus.innerHTML = `
+          <span class="status-failed">
+            讀取 demo 狀態失敗：${err.message}
+          </span>
+        `;
       }
     }
 
@@ -590,7 +845,10 @@
 
       submitBtn.disabled = true;
       loadingBox.style.display = "block";
-      document.getElementById("summary").innerHTML = `<span class="status-pending">執行中...</span>`;
+
+      document.getElementById("summary").innerHTML = `
+        <span class="status-pending">執行中...</span>
+      `;
       document.getElementById("workflowResult").innerHTML = "";
       document.getElementById("logs").innerHTML = "等待執行完成後讀取 logs...";
 
@@ -614,9 +872,12 @@
         if (data.order_id) {
           await loadLogs(data.order_id);
         }
+
       } catch (err) {
-        document.getElementById("summary").innerHTML =
-          `<span class="status-failed">前端或後端錯誤：</span>${err.message}`;
+        document.getElementById("summary").innerHTML = `
+          <span class="status-failed">前端或後端錯誤：</span>
+          ${err.message}
+        `;
       } finally {
         submitBtn.disabled = false;
         loadingBox.style.display = "none";
@@ -627,9 +888,10 @@
       const rawJson = document.getElementById("rawJson");
       rawJson.style.display = rawJson.style.display === "none" ? "block" : "none";
     }
+
     window.addEventListener("load", () => {
-        loadDemoStatus();
-        });
+      loadDemoStatus();
+    });
   </script>
 </body>
 </html>

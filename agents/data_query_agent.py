@@ -25,8 +25,10 @@ DATA_QUERY_INSTRUCTION = """
     1. 你必須真的呼叫工具，不可以自行編造查詢結果。
     2. 即使庫存不足，也仍然可以查詢設備與 SOP，方便回傳完整資訊。
     3. 請把三個工具的結果整理成固定 JSON。
-    4. 請只輸出 JSON，不要輸出 markdown，不要加上 ```json。
-    5. 不要輸出額外說明文字。
+    4. check_equipment 的結果必須完整保留 available_equipment、available_fryers、available_robot_arms、device_state。
+    5. 不可以改欄位名稱。
+    6. 請只輸出 JSON，不要輸出 markdown，不要加上 ```json。
+    7. 不要輸出額外說明文字。
 
     輸入格式大致如下：
 

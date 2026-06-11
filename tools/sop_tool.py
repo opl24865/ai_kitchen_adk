@@ -6,14 +6,7 @@ from database import execute_query
 def get_sop(order_id: str, item_name: str, preference: str = "") -> dict:
     """
     根據品項與顧客偏好取得對應 SOP。
-
-    Args:
-        order_id: 訂單 ID。
-        item_name: 品項名稱，例如「雞排」。
-        preference: 顧客偏好，例如「酥一點」。
-
-    Returns:
-        dict: SOP 查詢結果，包含 success、sop_id、item_name、preference_note、steps、message。
+    SOP 只描述需要的設備類型，不直接指定實際設備 ID。
     """
 
     if item_name == "雞排":
@@ -35,25 +28,25 @@ def get_sop(order_id: str, item_name: str, preference: str = "") -> dict:
                 {
                     "step_id": "S1",
                     "action": "preheat_fryer",
-                    "device": "fryer_A",
+                    "required_device_type": "fryer",
                     "duration_sec": 60
                 },
                 {
                     "step_id": "S2",
                     "action": "place_food_into_fryer",
-                    "device": "robot_arm_1",
+                    "required_device_type": "robot_arm",
                     "duration_sec": 20
                 },
                 {
                     "step_id": "S3",
                     "action": "fry",
-                    "device": "fryer_A",
+                    "required_device_type": "fryer",
                     "duration_sec": fry_time
                 },
                 {
                     "step_id": "S4",
                     "action": "remove_food_from_fryer",
-                    "device": "robot_arm_1",
+                    "required_device_type": "robot_arm",
                     "duration_sec": 20
                 }
             ],

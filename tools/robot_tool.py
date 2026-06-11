@@ -1,6 +1,7 @@
 # tools/robot_tool.py
-
+import requests
 from database import execute_query
+from config import ROBOT_SERVER_URL
 
 
 def execute_robot_task(order_id: str, task: dict) -> dict:
@@ -18,14 +19,16 @@ def execute_robot_task(order_id: str, task: dict) -> dict:
     device = task.get("device")
     action = task.get("action")
     duration_sec = task.get("duration_sec", 0)
+    task_id = task.get("task_id")
 
     if not device or not action:
         result = {
             "success": False,
+            "task_id": task_id,
             "device": device,
             "action": action,
             "duration_sec": duration_sec,
-            "message": "任務缺少 device 或 action，無法執行"
+            "message": "任務缺少 device 或 action，無法呼叫 Robot Server"
         }
 
         execute_query(
@@ -44,14 +47,42 @@ def execute_robot_task(order_id: str, task: dict) -> dict:
 
         return result
 
-    # 這裡目前只是模擬呼叫外部設備 API 成功
-    result = {
-        "success": True,
-        "device": device,
-        "action": action,
-        "duration_sec": duration_sec,
-        "message": f"{device} 已完成 {action}，耗時 {duration_sec} 秒"
-    }
+    try:
+        response = requests.post(
+            f"{ROBOT_SERVER_URL}/device/execute",
+            json={
+                "order_id": order_id,
+                "task_id": task_id,
+                "device": device,
+                "action": action,
+                "duration_sec": duration_sec,
+            },
+            timeout=5,
+        )
+
+        response.raise_for_status()
+        server_result = response.json()
+
+        result = {
+            "success": server_result.get("success", False),
+            "task_id": task_id,
+            "device": device,
+            "action": action,
+            "duration_sec": duration_sec,
+            "message": server_result.get("message", ""),
+            "robot_server_time": server_result.get("server_time"),
+        }
+
+    except requests.RequestException as e:
+        result = {
+            "success": False,
+            "task_id": task_id,
+            "device": device,
+            "action": action,
+            "duration_sec": duration_sec,
+            "message": f"Robot Server 呼叫失敗：{str(e)}",
+        }
+
 
     execute_query(
         """
