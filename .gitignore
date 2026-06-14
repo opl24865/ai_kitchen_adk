@@ -12,7 +12,7 @@ venv/
 .env
 .env.*
 
-# IDE
+# IDEW
 .vscode/
 .idea/
 
