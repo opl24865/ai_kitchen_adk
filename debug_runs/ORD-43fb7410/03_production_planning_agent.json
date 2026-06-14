@@ -1,0 +1,238 @@
+{
+  "agent_name": "production_planning_agent",
+  "input": {
+    "order_id": "ORD-43fb7410",
+    "customer_id": "C001",
+    "item_name": "雞排",
+    "quantity": 1,
+    "preference": "酥一點",
+    "workflow_status": "resource_assessment_failed",
+    "order_context": {
+      "order_type": "single_item_fried_food",
+      "priority": "normal",
+      "preference_intent": [
+        "extra_crispy"
+      ],
+      "production_goal": "炸至酥脆口感，注意控油時間與溫度",
+      "requires_resource_check": true,
+      "requires_sop_check": true,
+      "requires_equipment_assignment": true,
+      "notes": "顧客指定酥脆口感，需調整油炸製程以達到外酥內嫩效果。"
+    },
+    "data_query_result": {
+      "query_status": "success",
+      "inventory_check": {
+        "success": false,
+        "item_name": "雞排",
+        "required_qty": 1,
+        "stock_qty": 0,
+        "message": "雞排庫存不足"
+      },
+      "equipment_check": {
+        "success": true,
+        "available_equipment": [
+          "fryer_A",
+          "robot_arm_2"
+        ],
+        "available_fryers": [
+          "fryer_A"
+        ],
+        "available_robot_arms": [
+          "robot_arm_2"
+        ],
+        "device_state": {
+          "fryer_A": "available",
+          "fryer_B": "busy",
+          "fryer_C": "maintenance",
+          "robot_arm_1": "maintenance",
+          "robot_arm_2": "available"
+        },
+        "message": "設備查詢成功：可用炸鍋 ['fryer_A']，可用機械手臂 ['robot_arm_2']"
+      },
+      "sop_check": {
+        "success": true,
+        "sop_id": "fried_chicken_cutlet_standard",
+        "item_name": "雞排",
+        "preference_note": "依照顧客偏好，炸製時間增加 30 秒",
+        "steps": [
+          {
+            "step_id": "S1",
+            "action": "preheat_fryer",
+            "required_device_type": "fryer",
+            "duration_sec": 60
+          },
+          {
+            "step_id": "S2",
+            "action": "place_food_into_fryer",
+            "required_device_type": "robot_arm",
+            "duration_sec": 20
+          },
+          {
+            "step_id": "S3",
+            "action": "fry",
+            "required_device_type": "fryer",
+            "duration_sec": 210
+          },
+          {
+            "step_id": "S4",
+            "action": "remove_food_from_fryer",
+            "required_device_type": "robot_arm",
+            "duration_sec": 20
+          }
+        ],
+        "message": "成功取得 雞排 SOP"
+      }
+    },
+    "resource_assessment": {
+      "resource_status": "inventory_blocked",
+      "can_produce": false,
+      "blocking_reasons": [
+        "雞排庫存不足，目前庫存量為 0，無法滿足訂單需求"
+      ],
+      "recommendation": "請先補足雞排庫存後再進行生產。設備與SOP皆已就緒，庫存補足後即可開始製作。"
+    }
+  },
+  "raw_output": "{\n  \"order_id\": \"ORD-43fb7410\",\n  \"customer_id\": \"C001\",\n  \"item_name\": \"雞排\",\n  \"quantity\": 1,\n  \"preference\": \"酥一點\",\n  \"workflow_status\": \"planning_failed\",\n  \"order_context\": {\n    \"order_type\": \"single_item_fried_food\",\n    \"priority\": \"normal\",\n    \"preference_intent\": [\"extra_crispy\"],\n    \"production_goal\": \"炸至酥脆口感，注意控油時間與溫度\",\n    \"requires_resource_check\": true,\n    \"requires_sop_check\": true,\n    \"requires_equipment_assignment\": true,\n    \"notes\": \"顧客指定酥脆口感，需調整油炸製程以達到外酥內嫩效果。\"\n  },\n  \"data_query_result\": {\n    \"query_status\": \"success\",\n    \"inventory_check\": {\n      \"success\": false,\n      \"item_name\": \"雞排\",\n      \"required_qty\": 1,\n      \"stock_qty\": 0,\n      \"message\": \"雞排庫存不足\"\n    },\n    \"equipment_check\": {\n      \"success\": true,\n      \"available_equipment\": [\"fryer_A\", \"robot_arm_2\"],\n      \"available_fryers\": [\"fryer_A\"],\n      \"available_robot_arms\": [\"robot_arm_2\"],\n      \"device_state\": {\n        \"fryer_A\": \"available\",\n        \"fryer_B\": \"busy\",\n        \"fryer_C\": \"maintenance\",\n        \"robot_arm_1\": \"maintenance\",\n        \"robot_arm_2\": \"available\"\n      },\n      \"message\": \"設備查詢成功：可用炸鍋 ['fryer_A']，可用機械手臂 ['robot_arm_2']\"\n    },\n    \"sop_check\": {\n      \"success\": true,\n      \"sop_id\": \"fried_chicken_cutlet_standard\",\n      \"item_name\": \"雞排\",\n      \"preference_note\": \"依照顧客偏好，炸製時間增加 30 秒\",\n      \"steps\": [\n        {\n          \"step_id\": \"S1\",\n          \"action\": \"preheat_fryer\",\n          \"required_device_type\": \"fryer\",\n          \"duration_sec\": 60\n        },\n        {\n          \"step_id\": \"S2\",\n          \"action\": \"place_food_into_fryer\",\n          \"required_device_type\": \"robot_arm\",\n          \"duration_sec\": 20\n        },\n        {\n          \"step_id\": \"S3\",\n          \"action\": \"fry\",\n          \"required_device_type\": \"fryer\",\n          \"duration_sec\": 210\n        },\n        {\n          \"step_id\": \"S4\",\n          \"action\": \"remove_food_from_fryer\",\n          \"required_device_type\": \"robot_arm\",\n          \"duration_sec\": 20\n        }\n      ],\n      \"message\": \"成功取得 雞排 SOP\"\n    }\n  },\n  \"resource_assessment\": {\n    \"resource_status\": \"inventory_blocked\",\n    \"can_produce\": false,\n    \"blocking_reasons\": [\"雞排庫存不足，目前庫存量為 0，無法滿足訂單需求\"],\n    \"recommendation\": \"請先補足雞排庫存後再進行生產。設備與SOP皆已就緒，庫存補足後即可開始製作。\"\n  },\n  \"production_decision\": {\n    \"decision_type\": \"escalate_inventory\",\n    \"decision_reason\": \"雞排庫存不足，無法滿足訂單需求。設備與SOP皆已就緒，但庫存為0，需先補貨後才能生產。\",\n    \"requires_human_intervention\": true,\n    \"customer_impact\": \"delay\"\n  },\n  \"plan\": {\n    \"plan_status\": \"failed\",\n    \"reason\": \"庫存查詢失敗：雞排庫存不足，目前庫存量為0，無法生產。\",\n    \"selected_equipment\": {\n      \"fryer\": \"fryer_A\",\n      \"robot_arm\": \"robot_arm_2\"\n    },\n    \"tasks\": [\n      {\n        \"task_id\": \"T1\",\n        \"device\": \"fryer_A\",\n        \"action\": \"preheat_fryer\",\n        \"duration_sec\": 60,\n        \"status\": \"pending\"\n      },\n      {\n        \"task_id\": \"T2\",\n        \"device\": \"robot_arm_2\",\n        \"action\": \"place_food_into_fryer\",\n        \"duration_sec\": 20,\n        \"status\": \"pending\"\n      },\n      {\n        \"task_id\": \"T3\",\n        \"device\": \"fryer_A\",\n        \"action\": \"fry\",\n        \"duration_sec\": 210,\n        \"status\": \"pending\"\n      },\n      {\n        \"task_id\": \"T4\",\n        \"device\": \"robot_arm_2\",\n        \"action\": \"remove_food_from_fryer\",\n        \"duration_sec\": 20,\n        \"status\": \"pending\"\n      }\n    ]\n  }\n}",
+  "json_valid": true,
+  "parse_error": null,
+  "output": {
+    "order_id": "ORD-43fb7410",
+    "customer_id": "C001",
+    "item_name": "雞排",
+    "quantity": 1,
+    "preference": "酥一點",
+    "workflow_status": "planning_failed",
+    "order_context": {
+      "order_type": "single_item_fried_food",
+      "priority": "normal",
+      "preference_intent": [
+        "extra_crispy"
+      ],
+      "production_goal": "炸至酥脆口感，注意控油時間與溫度",
+      "requires_resource_check": true,
+      "requires_sop_check": true,
+      "requires_equipment_assignment": true,
+      "notes": "顧客指定酥脆口感，需調整油炸製程以達到外酥內嫩效果。"
+    },
+    "data_query_result": {
+      "query_status": "success",
+      "inventory_check": {
+        "success": false,
+        "item_name": "雞排",
+        "required_qty": 1,
+        "stock_qty": 0,
+        "message": "雞排庫存不足"
+      },
+      "equipment_check": {
+        "success": true,
+        "available_equipment": [
+          "fryer_A",
+          "robot_arm_2"
+        ],
+        "available_fryers": [
+          "fryer_A"
+        ],
+        "available_robot_arms": [
+          "robot_arm_2"
+        ],
+        "device_state": {
+          "fryer_A": "available",
+          "fryer_B": "busy",
+          "fryer_C": "maintenance",
+          "robot_arm_1": "maintenance",
+          "robot_arm_2": "available"
+        },
+        "message": "設備查詢成功：可用炸鍋 ['fryer_A']，可用機械手臂 ['robot_arm_2']"
+      },
+      "sop_check": {
+        "success": true,
+        "sop_id": "fried_chicken_cutlet_standard",
+        "item_name": "雞排",
+        "preference_note": "依照顧客偏好，炸製時間增加 30 秒",
+        "steps": [
+          {
+            "step_id": "S1",
+            "action": "preheat_fryer",
+            "required_device_type": "fryer",
+            "duration_sec": 60
+          },
+          {
+            "step_id": "S2",
+            "action": "place_food_into_fryer",
+            "required_device_type": "robot_arm",
+            "duration_sec": 20
+          },
+          {
+            "step_id": "S3",
+            "action": "fry",
+            "required_device_type": "fryer",
+            "duration_sec": 210
+          },
+          {
+            "step_id": "S4",
+            "action": "remove_food_from_fryer",
+            "required_device_type": "robot_arm",
+            "duration_sec": 20
+          }
+        ],
+        "message": "成功取得 雞排 SOP"
+      }
+    },
+    "resource_assessment": {
+      "resource_status": "inventory_blocked",
+      "can_produce": false,
+      "blocking_reasons": [
+        "雞排庫存不足，目前庫存量為 0，無法滿足訂單需求"
+      ],
+      "recommendation": "請先補足雞排庫存後再進行生產。設備與SOP皆已就緒，庫存補足後即可開始製作。"
+    },
+    "production_decision": {
+      "decision_type": "escalate_inventory",
+      "decision_reason": "雞排庫存不足，無法滿足訂單需求。設備與SOP皆已就緒，但庫存為0，需先補貨後才能生產。",
+      "requires_human_intervention": true,
+      "customer_impact": "delay"
+    },
+    "plan": {
+      "plan_status": "failed",
+      "reason": "庫存查詢失敗：雞排庫存不足，目前庫存量為0，無法生產。",
+      "selected_equipment": {
+        "fryer": "fryer_A",
+        "robot_arm": "robot_arm_2"
+      },
+      "tasks": [
+        {
+          "task_id": "T1",
+          "device": "fryer_A",
+          "action": "preheat_fryer",
+          "duration_sec": 60,
+          "status": "pending"
+        },
+        {
+          "task_id": "T2",
+          "device": "robot_arm_2",
+          "action": "place_food_into_fryer",
+          "duration_sec": 20,
+          "status": "pending"
+        },
+        {
+          "task_id": "T3",
+          "device": "fryer_A",
+          "action": "fry",
+          "duration_sec": 210,
+          "status": "pending"
+        },
+        {
+          "task_id": "T4",
+          "device": "robot_arm_2",
+          "action": "remove_food_from_fryer",
+          "duration_sec": 20,
+          "status": "pending"
+        }
+      ]
+    }
+  },
+  "required_keys_check": {
+    "passed": true,
+    "missing_keys": []
+  }
+}

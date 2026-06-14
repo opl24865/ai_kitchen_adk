@@ -1,0 +1,37 @@
+{
+  "agent_name": "order_intake_agent",
+  "input": {
+    "order_id": "ORD-1fad6b08",
+    "customer_id": "C001",
+    "item_name": "雞排",
+    "quantity": 1,
+    "preference": "酥一點"
+  },
+  "raw_output": "{\n  \"order_id\": \"ORD-1fad6b08\",\n  \"customer_id\": \"C001\",\n  \"item_name\": \"雞排\",\n  \"quantity\": 1,\n  \"preference\": \"酥一點\",\n  \"workflow_status\": \"order_intake_completed\",\n  \"order_context\": {\n    \"order_type\": \"single_item_fried_food\",\n    \"priority\": \"normal\",\n    \"preference_intent\": [\"extra_crispy\"],\n    \"production_goal\": \"製作酥脆口感的雞排\",\n    \"requires_resource_check\": true,\n    \"requires_sop_check\": true,\n    \"requires_equipment_assignment\": true,\n    \"notes\": \"顧客要求酥一點，屬偏好型訂單，無特殊緊急需求。\"\n  }\n}",
+  "json_valid": true,
+  "parse_error": null,
+  "output": {
+    "order_id": "ORD-1fad6b08",
+    "customer_id": "C001",
+    "item_name": "雞排",
+    "quantity": 1,
+    "preference": "酥一點",
+    "workflow_status": "order_intake_completed",
+    "order_context": {
+      "order_type": "single_item_fried_food",
+      "priority": "normal",
+      "preference_intent": [
+        "extra_crispy"
+      ],
+      "production_goal": "製作酥脆口感的雞排",
+      "requires_resource_check": true,
+      "requires_sop_check": true,
+      "requires_equipment_assignment": true,
+      "notes": "顧客要求酥一點，屬偏好型訂單，無特殊緊急需求。"
+    }
+  },
+  "required_keys_check": {
+    "passed": true,
+    "missing_keys": []
+  }
+}

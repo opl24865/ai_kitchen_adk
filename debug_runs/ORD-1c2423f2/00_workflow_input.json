@@ -1,0 +1,10 @@
+{
+  "description": "FastAPI 傳給 ADK root_agent 的原始輸入",
+  "workflow_input": {
+    "order_id": "ORD-1c2423f2",
+    "customer_id": "C001",
+    "item_name": "雞排",
+    "quantity": 10,
+    "preference": "酥一點"
+  }
+}

@@ -2,855 +2,1144 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <title>AI Kitchen ADK Demo Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Kitchen Agent Demo</title>
 
-  <style>
-    body {
-      font-family: Arial, "Microsoft JhengHei", sans-serif;
-      background: #f5f6fa;
-      margin: 0;
-      padding: 24px;
-      color: #222;
-    }
-
-    h1 {
-      margin-bottom: 4px;
-    }
-
-    .subtitle {
-      color: #666;
-      margin-bottom: 24px;
-    }
-
-    .container {
-      display: grid;
-      grid-template-columns: 360px 1fr;
-      gap: 24px;
-      align-items: start;
-    }
-
-    .card {
-      background: white;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-      margin-bottom: 16px;
-    }
-
-    label {
-      display: block;
-      margin-top: 12px;
-      font-weight: bold;
-    }
-
-    input,
-    select {
-      width: 100%;
-      padding: 10px;
-      margin-top: 6px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      box-sizing: border-box;
-      font-size: 14px;
-    }
-
-    button {
-      width: 100%;
-      margin-top: 18px;
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
-      background: #2563eb;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #1d4ed8;
-    }
-
-    button:disabled {
-      background: #999;
-      cursor: not-allowed;
-    }
-
-    .btn-danger {
-      background: #dc2626;
-    }
-
-    .btn-danger:hover {
-      background: #b91c1c;
-    }
-
-    .btn-warning {
-      background: #f97316;
-    }
-
-    .btn-warning:hover {
-      background: #ea580c;
-    }
-
-    .btn-gray {
-      background: #475569;
-    }
-
-    .btn-gray:hover {
-      background: #334155;
-    }
-
-    .status-success {
-      color: #15803d;
-      font-weight: bold;
-    }
-
-    .status-failed {
-      color: #b91c1c;
-      font-weight: bold;
-    }
-
-    .status-pending {
-      color: #92400e;
-      font-weight: bold;
-    }
-
-    .status-muted {
-      color: #64748b;
-      font-weight: bold;
-    }
-
-    .flow {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .agent-box {
-      border: 1px solid #ddd;
-      border-left: 6px solid #999;
-      border-radius: 10px;
-      padding: 14px;
-      background: #fafafa;
-    }
-
-    .agent-box.success {
-      border-left-color: #22c55e;
-      background: #f0fdf4;
-    }
-
-    .agent-box.failed {
-      border-left-color: #ef4444;
-      background: #fef2f2;
-    }
-
-    .agent-box.pending {
-      border-left-color: #f59e0b;
-      background: #fffbeb;
-    }
-
-    .agent-title {
-      font-size: 17px;
-      font-weight: bold;
-      margin-bottom: 8px;
-    }
-
-    .agent-detail {
-      margin: 4px 0;
-      color: #444;
-      line-height: 1.5;
-    }
-
-    .sub-section {
-      margin-top: 10px;
-      padding: 10px;
-      background: rgba(255, 255, 255, 0.65);
-      border-radius: 8px;
-      border: 1px solid #e5e7eb;
-    }
-
-    .sub-title {
-      font-weight: bold;
-      margin-bottom: 6px;
-    }
-
-    .task-list {
-      margin-top: 8px;
-      padding-left: 18px;
-    }
-
-    .task-list li {
-      margin-bottom: 6px;
-      line-height: 1.5;
-    }
-
-    .device-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 8px;
-      margin-top: 8px;
-    }
-
-    .device-pill {
-      padding: 8px;
-      border-radius: 8px;
-      background: white;
-      border: 1px solid #ddd;
-      font-size: 14px;
-    }
-
-    .log-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 12px;
-      font-size: 14px;
-    }
-
-    .log-table th,
-    .log-table td {
-      border-bottom: 1px solid #ddd;
-      padding: 8px;
-      text-align: left;
-      vertical-align: top;
-    }
-
-    .log-table th {
-      background: #f1f5f9;
-    }
-
-    .loading {
-      padding: 16px;
-      background: #fff7ed;
-      border: 1px solid #fed7aa;
-      border-radius: 10px;
-      color: #9a3412;
-      margin-bottom: 16px;
-    }
-
-    .empty {
-      color: #777;
-      padding: 12px 0;
-    }
-
-    .summary {
-      font-size: 18px;
-      padding: 12px;
-      border-radius: 10px;
-      background: #f8fafc;
-      margin-bottom: 16px;
-      line-height: 1.6;
-    }
-
-    .small-text {
-      color: #666;
-      font-size: 13px;
-      line-height: 1.5;
-    }
-
-    pre {
-      white-space: pre-wrap;
-      word-wrap: break-word;
-      background: #0f172a;
-      color: #e2e8f0;
-      padding: 14px;
-      border-radius: 10px;
-      overflow-x: auto;
-      font-size: 13px;
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-size: 12px;
-      background: #e2e8f0;
-      margin-left: 4px;
-    }
-
-    .badge-green {
-      background: #dcfce7;
-      color: #166534;
-    }
-
-    .badge-red {
-      background: #fee2e2;
-      color: #991b1b;
-    }
-
-    .badge-orange {
-      background: #ffedd5;
-      color: #9a3412;
-    }
-  </style>
+  <link rel="stylesheet" href="/static/style.css" />
 </head>
 
 <body>
-  <h1>AI Kitchen ADK Demo Dashboard</h1>
-  <div class="subtitle">
-    前端下單 → DataQueryAgent 查詢 Robot Server / SQLite → PlannerAgent 選設備 → ExecutorAgent 呼叫 Robot Server → NotifyAgent 通知顧客
-  </div>
-
-  <div class="container">
-    <div>
-      <div class="card">
-        <h2>建立訂單</h2>
-
-        <label>顧客 ID</label>
-        <input id="customerId" value="C001" />
-
-        <label>品項</label>
-        <select id="itemName">
-          <option value="雞排">雞排</option>
-          <option value="薯條">薯條</option>
-          <option value="不存在品項">不存在品項</option>
-        </select>
-
-        <label>數量</label>
-        <input id="quantity" type="number" value="1" min="1" />
-
-        <label>顧客偏好</label>
-        <input id="preference" value="酥一點" />
-
-        <button id="submitBtn" onclick="submitOrder()">送出訂單並執行 Workflow</button>
-
-        <p class="small-text">
-          建議測試：雞排 / 數量 1 / 酥一點。<br />
-          若 Robot Server 狀態是 fryer_A 維修、fryer_B 忙碌、fryer_C 可用，PlannerAgent 應該選擇 fryer_C。
-        </p>
+  <div class="page">
+    <header class="topbar">
+      <div>
+        <h1>AI Kitchen Agent Demo</h1>
+        <div class="subtitle">
+          一頁看懂：訂單進來後，Agent 如何判斷能不能做、要誰做、是否需要人工處理
+        </div>
       </div>
+      <div id="systemBadge" class="system-badge">
+        <span class="dot pending"></span>
+        尚未執行訂單
+      </div>
+    </header>
 
-      <div class="card">
-        <h2>Demo 情境控制</h2>
+    <main class="layout">
+      <section class="side">
+        <div class="card">
+          <div class="panel-title">
+            <h2>測試訂單</h2>
+            <span id="orderModeBadge" class="pill wait">Single Agent</span>
+          </div>
 
-        <button onclick="setScenario('/demo/reset')">
-          恢復正常情境
-        </button>
+          <div id="orderInputList" class="order-input-list">
+          </div>
 
-        <button class="btn-danger" onclick="setScenario('/demo/set-inventory-low')">
-          設定庫存不足
-        </button>
+          <button class="btn-gray" onclick="addOrderInput()">
+            ＋ 新增一筆訂單
+          </button>
 
-        <button class="btn-warning" onclick="setScenario('/demo/set-equipment-down')">
-          設定設備維修
-        </button>
+          <button id="submitBtn" onclick="submitOrders()">
+            執行訂單 Workflow
+          </button>
 
-        <div id="scenarioMessage" class="small-text" style="margin-top:12px;">
-          目前尚未切換情境
+          <p class="small-text">
+            只有 1 筆訂單時，會走原本單筆 <strong>/order</strong> workflow。<br />
+            2 筆以上時，會自動改用 <strong>BatchOrderCoordinatorAgent</strong> 做多筆訂單決策。
+          </p>
         </div>
 
-        <div id="demoStatus" class="small-text" style="margin-top:12px;">
-          尚未讀取狀態
+        <div class="card">
+          <div class="panel-title">
+            <h2>測試情境</h2>
+            <span class="pill wait">Demo Control</span>
+          </div>
+
+          <div class="button-row">
+            <button onclick="setScenario('/demo/reset')">正常</button>
+            <button class="btn-danger" onclick="setScenario('/demo/set-inventory-low')">庫存不足</button>
+            <button class="btn-warning" onclick="setScenario('/demo/set-equipment-down')">設備維修</button>
+          </div>
+          <div id="scenarioMessage" class="small-text scenario-message">
+            尚未切換情境
+          </div>
         </div>
+      </section>
 
-        <p class="small-text">
-          注意：如果你已經改成由 Robot Server 管理設備狀態，這些按鈕是否會影響設備狀態，取決於你的後端 `/demo/*` API 是否也有同步呼叫 Robot Server。
-        </p>
-      </div>
+      <section class="main">
+        <section class="hero-status">
+          <div class="status-card">
+            <div class="status-label">訂單結果</div>
+            <div id="orderStatus" class="status-value muted">尚未執行</div>
+            <div id="orderDetail" class="status-detail">
+              顯示這筆訂單最後是完成、失敗或需人工處理。
+            </div>
+          </div>
 
-      <div class="card">
-        <h2>目前訂單</h2>
-        <div id="orderInfo" class="empty">尚未送出訂單</div>
-      </div>
-    </div>
+          <div class="status-card">
+            <div class="status-label">資源狀態</div>
+            <div id="inventoryStatus" class="status-value muted">未評估</div>
+            <div id="inventoryDetail" class="status-detail">
+              檢查庫存、設備和 SOP 是否足夠。
+            </div>
+          </div>
 
-    <div>
-      <div id="loadingBox" class="loading" style="display:none;">
-        Workflow 執行中，正在呼叫 ADK Agents、Tools 與 Robot Server...
-      </div>
+          <div class="status-card">
+            <div class="status-label">Agent 決策</div>
+            <div id="decisionStatus" class="status-value muted">未決策</div>
+            <div id="decisionDetail" class="status-detail">
+              判斷要自動製作，還是交給人工處理。
+            </div>
+          </div>
 
-      <div class="card">
-        <h2>Workflow 執行結果</h2>
-        <div id="summary" class="summary">尚未執行</div>
-        <div id="workflowResult" class="flow"></div>
-      </div>
+          <div class="status-card">
+            <div class="status-label">通知結果</div>
+            <div id="notifyStatus" class="status-value muted">未通知</div>
+            <div id="notifyDetail" class="status-detail">
+              顯示顧客通知或內部處理提醒。
+            </div>
+          </div>
+        </section>
 
-      <div class="card">
-        <h2>Agent / Tool 執行紀錄</h2>
-        <div id="logs">尚無 logs</div>
-      </div>
+        <section id="alertBanner" class="alert-banner">
+          <div class="alert-icon">i</div>
+          <div>
+            <strong id="alertTitle">目前沒有異常</strong>
+            <div id="alertMessage" class="small-text">
+              若庫存不足、設備故障或 SOP 不完整，會直接顯示在這裡。
+            </div>
+          </div>
+        </section>
 
-      <div class="card">
-        <h2>原始回傳資料</h2>
-        <button class="btn-gray" onclick="toggleRaw()">顯示 / 隱藏 Raw JSON</button>
-        <pre id="rawJson" style="display:none;"></pre>
-      </div>
-    </div>
+        <section id="singleDecisionSection" class="card">
+          <div class="panel-title">
+            <h2>單筆訂單決策</h2>
+            <span id="decisionBadge" class="pill wait">Waiting</span>
+          </div>
+
+          <div id="decisionCards" class="decision-grid">
+            <div class="decision-card">
+              <div class="decision-title">
+                <strong>OrderIntakeAgent</strong>
+                <span class="pill wait">等待</span>
+              </div>
+              <div class="small-text">整理顧客需求與偏好。</div>
+            </div>
+
+            <div class="decision-card">
+              <div class="decision-title">
+                <strong>ResourceAssessmentAgent</strong>
+                <span class="pill wait">等待</span>
+              </div>
+              <div class="small-text">判斷現場能不能做。</div>
+            </div>
+
+            <div class="decision-card">
+              <div class="decision-title">
+                <strong>ProductionPlanningAgent</strong>
+                <span class="pill wait">等待</span>
+              </div>
+              <div class="small-text">決定自動執行或轉人工。</div>
+            </div>
+
+            <div class="decision-card">
+              <div class="decision-title">
+                <strong>Equipment / Notify</strong>
+                <span class="pill wait">等待</span>
+              </div>
+              <div class="small-text">顯示設備與通知結果。</div>
+            </div>
+          </div>
+        </section>
+
+        <section id="batchDecisionSection" class="card hidden">
+          <div class="panel-title">
+            <h2>多筆訂單協調決策</h2>
+            <span id="batchBadge" class="pill wait">Not Run</span>
+          </div>
+        
+          <div id="batchSummary" class="small-text">
+            目前尚未執行多筆訂單。新增 2 筆以上訂單後，會交給 BatchOrderCoordinatorAgent 做決策。
+          </div>
+        
+          <div id="batchOrders" class="list section-spacer">
+          </div>
+        </section>
+
+        <section class="dashboard-grid">
+          <div id="singleAgentFlowCard" class="card">
+            <div class="panel-title">
+              <h2>單筆 Agent 流程</h2>
+              <span id="workflowBadge" class="pill wait">Waiting</span>
+            </div>
+
+            <div id="agentFlow" class="agent-flow">
+              <div class="agent-step pending">
+                <div>
+                  <div class="agent-name">OrderIntake</div>
+                  <div class="agent-desc">理解訂單</div>
+                </div>
+                <span class="pill wait">等待</span>
+              </div>
+              <div class="agent-step pending">
+                <div>
+                  <div class="agent-name">Resource</div>
+                  <div class="agent-desc">檢查資源</div>
+                </div>
+                <span class="pill wait">等待</span>
+              </div>
+              <div class="agent-step pending">
+                <div>
+                  <div class="agent-name">Planning</div>
+                  <div class="agent-desc">Agent 決策與設備分派</div>
+                </div>
+                <span class="pill wait">等待</span>
+              </div>
+              <div class="agent-step pending">
+                <div>
+                  <div class="agent-name">Execution</div>
+                  <div class="agent-desc">呼叫設備</div>
+                </div>
+                <span class="pill wait">等待</span>
+              </div>
+              <div class="agent-step pending">
+                <div>
+                  <div class="agent-name">Notify</div>
+                  <div class="agent-desc">通知結果</div>
+                </div>
+                <span class="pill wait">等待</span>
+              </div>
+            </div>
+
+            <div id="decisionSummary" class="footer-note">
+              尚未產生決策摘要
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="panel-title">
+              <h2>現場狀態</h2>
+              <span id="resourceBadge" class="pill wait">Loading</span>
+            </div>
+
+            <div class="dashboard-grid resource-inner-grid">
+              <div>
+                <div class="status-label">庫存</div>
+                <div id="inventoryList" class="list">
+                  <div class="row">
+                    <strong>讀取中</strong>
+                    <span class="pill wait">Loading</span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div class="status-label">設備</div>
+                <div id="deviceList" class="equipment-grid">
+                  <div class="equipment">
+                    <div class="equipment-name">讀取中</div>
+                    <span class="pill wait">Loading</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="status-label section-spacer">設備選擇</div>
+            <div class="list">
+              <div class="row">
+                <strong>炸鍋</strong>
+                <span id="selectedFryer" class="pill">未選擇</span>
+              </div>
+              <div class="row">
+                <strong>手臂</strong>
+                <span id="selectedArm" class="pill">未選擇</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
   </div>
 
   <script>
-    let lastRawData = null;
-
-    function statusText(success) {
-      return success ? "成功" : "失敗";
+    function setSystemBadge(type, text) {
+      const badge = document.getElementById("systemBadge");
+      badge.innerHTML = `<span class="dot ${type}"></span>${text}`;
     }
 
-    function statusClass(success) {
-      return success ? "status-success" : "status-failed";
+    function setText(id, text) {
+      document.getElementById(id).textContent = text;
     }
 
-    function deviceStatusClass(status) {
-      if (status === "available") return "status-success";
-      if (status === "busy") return "status-pending";
-      if (status === "maintenance") return "status-failed";
-      return "status-muted";
+    function setStatus(id, text, statusClass) {
+      const el = document.getElementById(id);
+      el.textContent = text;
+      el.className = `status-value ${statusClass}`;
     }
 
-    function deviceBadge(status) {
-      if (status === "available") {
-        return `<span class="badge badge-green">available</span>`;
-      }
-      if (status === "busy") {
-        return `<span class="badge badge-orange">busy</span>`;
-      }
-      if (status === "maintenance") {
-        return `<span class="badge badge-red">maintenance</span>`;
-      }
-      return `<span class="badge">${status || "unknown"}</span>`;
+    function pill(text, type = "") {
+      return `<span class="pill ${type}">${text}</span>`;
     }
 
-    function agentBox(title, statusType, detailsHtml) {
-      let cls = "pending";
-      let statusLabel = `<span class="status-pending">未執行</span>`;
-
-      if (statusType === "success") {
-        cls = "success";
-        statusLabel = `<span class="status-success">成功</span>`;
-      }
-
-      if (statusType === "failed") {
-        cls = "failed";
-        statusLabel = `<span class="status-failed">失敗</span>`;
-      }
-
-      return `
-        <div class="agent-box ${cls}">
-          <div class="agent-title">${title}：${statusLabel}</div>
-          ${detailsHtml}
-        </div>
-      `;
+    function deviceType(status) {
+      if (status === "available") return "ok";
+      if (status === "busy") return "wait";
+      if (status === "maintenance") return "fail";
+      return "";
     }
 
-    function renderDeviceState(deviceState) {
-      if (!deviceState || Object.keys(deviceState).length === 0) {
-        return `<div class="agent-detail">沒有取得 Robot Server 設備狀態</div>`;
-      }
-
-      return `
-        <div class="device-grid">
-          ${Object.entries(deviceState).map(([deviceId, status]) => `
-            <div class="device-pill">
-              <strong>${deviceId}</strong><br />
-              ${deviceBadge(status)}
-            </div>
-          `).join("")}
-        </div>
-      `;
+    function statusLabel(status) {
+      if (status === "available") return "可用";
+      if (status === "busy") return "忙碌";
+      if (status === "maintenance") return "維修";
+      return status || "未知";
     }
 
-    function renderWorkflow(data) {
-      const resultDiv = document.getElementById("workflowResult");
-      const summaryDiv = document.getElementById("summary");
+    function booleanLabel(value) {
+      if (value === true) return pill("是", "ok");
+      if (value === false) return pill("否", "fail");
+      return pill("未知");
+    }
 
-      if (!data) {
-        resultDiv.innerHTML = "";
-        summaryDiv.innerText = "尚未執行";
-        return;
+    function joinList(value, emptyText = "無") {
+      if (Array.isArray(value)) {
+        return value.length > 0 ? value.join("、") : emptyText;
       }
+      if (typeof value === "string" && value.trim()) {
+        return value;
+      }
+      return emptyText;
+    }
 
-      if (data.success === true) {
-        summaryDiv.innerHTML = `
-          <span class="status-success">訂單完成：</span>
-          ${data.message || "Workflow 成功完成"}
-        `;
-      } else {
-        summaryDiv.innerHTML = `
-          <span class="status-failed">訂單失敗：</span>
-          ${data.reason || "Workflow 執行失敗"}
-          <br />
-          <span class="small-text">失敗階段：${data.stage || "未知"}</span>
-        `;
-      }
+    function decisionTypeLabel(type) {
+      const mapping = {
+        "auto_execute": ["自動執行", "ok"],
+        "escalate_inventory": ["通知補貨", "fail"],
+        "escalate_equipment": ["通知維修", "fail"],
+        "escalate_sop": ["補 SOP", "fail"],
+        "manual_review": ["人工覆核", "wait"]
+      };
+
+      const item = mapping[type] || [type || "未決策", type ? "wait" : ""];
+      return pill(item[0], item[1]);
+    }
+
+    function resourceStatusLabel(status) {
+      const mapping = {
+        "ready": ["資源可用", "ok"],
+        "inventory_blocked": ["庫存阻擋", "fail"],
+        "equipment_blocked": ["設備阻擋", "fail"],
+        "sop_blocked": ["SOP 阻擋", "fail"]
+      };
+
+      const item = mapping[status] || [status || "未評估", status ? "wait" : ""];
+      return pill(item[0], item[1]);
+    }
+
+    function stageStatus(data, stageName) {
+      if (!data) return "pending";
 
       const dq = data.data_query_result || {};
       const inventory = dq.inventory_check || {};
       const equipment = dq.equipment_check || {};
       const sop = dq.sop_check || {};
-
-      const plan = data.plan || {};
-      const execution = data.execution_result || {};
-      const notify = data.notify_result || {};
-
-      let html = "";
-
       const dataQuerySuccess =
         dq.query_status === "success" ||
         (inventory.success && equipment.success && sop.success);
 
-      html += agentBox(
-        "DataQueryAgent 資料查詢",
-        dataQuerySuccess ? "success" : "failed",
-        `
-          <div class="agent-detail">
-            Inventory Tool：
-            <span class="${statusClass(inventory.success)}">${statusText(inventory.success)}</span>
-            - ${inventory.message || ""}
-          </div>
-
-          <div class="agent-detail">
-            Equipment Tool：
-            <span class="${statusClass(equipment.success)}">${statusText(equipment.success)}</span>
-            - ${equipment.message || ""}
-          </div>
-
-          <div class="agent-detail">
-            SOP Tool：
-            <span class="${statusClass(sop.success)}">${statusText(sop.success)}</span>
-            - ${sop.message || ""}
-          </div>
-
-          <div class="sub-section">
-            <div class="sub-title">Robot Server 即時設備狀態</div>
-            ${renderDeviceState(equipment.device_state)}
-          </div>
-
-          <div class="sub-section">
-            <div class="sub-title">可用設備清單</div>
-            <div class="agent-detail">
-              可用炸鍋：
-              <strong>${(equipment.available_fryers || []).join(", ") || "無"}</strong>
-            </div>
-            <div class="agent-detail">
-              可用機械手臂：
-              <strong>${(equipment.available_robot_arms || []).join(", ") || "無"}</strong>
-            </div>
-          </div>
-
-          <div class="agent-detail">
-            偏好處理：${sop.preference_note || "無"}
-          </div>
-        `
-      );
-
-      const tasks = plan.tasks || [];
-      const selectedEquipment = plan.selected_equipment || {};
-
-      const taskHtml = tasks.length > 0
-        ? `
-          <ul class="task-list">
-            ${tasks.map(task => `
-              <li>
-                <strong>${task.task_id || ""}</strong>：
-                <span>${task.device || "未指定設備"}</span>
-                →
-                <span>${task.action || ""}</span>
-                (${task.duration_sec || 0} 秒)
-              </li>
-            `).join("")}
-          </ul>
-        `
-        : `<div class="agent-detail">尚無任務</div>`;
-
-      if (!data.plan) {
-        html += agentBox(
-          "PlannerAgent 任務規劃",
-          "pending",
-          `
-            <div class="agent-detail">
-              前一階段失敗，因此未進入任務規劃。
-            </div>
-          `
-        );
-      } else {
-        html += agentBox(
-          "PlannerAgent 任務規劃",
-          plan.plan_status === "ready" ? "success" : "failed",
-          `
-            <div class="agent-detail">規劃狀態：${plan.plan_status || "無"}</div>
-            <div class="agent-detail">原因：${plan.reason || "無"}</div>
-
-            <div class="sub-section">
-              <div class="sub-title">PlannerAgent 選擇的設備</div>
-              <div class="agent-detail">
-                選擇炸鍋：
-                <strong>${selectedEquipment.fryer || "未選擇"}</strong>
-              </div>
-              <div class="agent-detail">
-                選擇機械手臂：
-                <strong>${selectedEquipment.robot_arm || "未選擇"}</strong>
-              </div>
-            </div>
-
-            <div class="agent-detail">產生任務數：${tasks.length}</div>
-            ${taskHtml}
-          `
-        );
+      if (stageName === "order") {
+        return data.order_context ? "success" : data.order_id ? "success" : "pending";
       }
 
-      const execResults = execution.results || [];
-
-      const execHtml = execResults.length > 0
-        ? `
-          <ul class="task-list">
-            ${execResults.map(result => `
-              <li>
-                <strong>${result.task_id || ""}</strong>：
-                <span class="${statusClass(result.success)}">${statusText(result.success)}</span>
-                -
-                ${result.device || ""} 執行 ${result.action || ""}
-                (${result.duration_sec || 0} 秒)
-                <br />
-                <span class="small-text">
-                  Robot Server 回覆：${result.message || ""}
-                  ${result.robot_server_time ? `｜時間：${result.robot_server_time}` : ""}
-                </span>
-              </li>
-            `).join("")}
-          </ul>
-        `
-        : `<div class="agent-detail">尚無執行結果</div>`;
-
-      if (!data.execution_result) {
-        html += agentBox(
-          "ExecutorAgent 設備執行",
-          "pending",
-          `
-            <div class="agent-detail">
-              前一階段尚未完成，因此未進入設備執行。
-            </div>
-          `
-        );
-      } else {
-        html += agentBox(
-          "ExecutorAgent 設備執行",
-          execution.execution_status === "completed" ? "success" : "failed",
-          `
-            <div class="agent-detail">執行狀態：${execution.execution_status || "無"}</div>
-            <div class="agent-detail">訊息：${execution.message || "無"}</div>
-
-            <div class="sub-section">
-              <div class="sub-title">Robot Server 執行結果</div>
-              ${execHtml}
-            </div>
-          `
-        );
+      if (stageName === "resource") {
+        return data.resource_assessment
+          ? (data.resource_assessment.can_produce ? "success" : "failed")
+          : data.data_query_result
+            ? (dataQuerySuccess ? "success" : "failed")
+            : "pending";
       }
 
-      if (!data.notify_result) {
-        html += agentBox(
-          "NotifyAgent 顧客通知",
-          "pending",
-          `
-            <div class="agent-detail">
-              前一階段尚未完成，因此未通知顧客。
-            </div>
-          `
-        );
-      } else {
-        const notification = notify.notification || {};
-
-        html += agentBox(
-          "NotifyAgent 顧客通知",
-          notify.notify_status === "sent" ? "success" : "failed",
-          `
-            <div class="agent-detail">通知狀態：${notify.notify_status || "無"}</div>
-            <div class="agent-detail">
-              通知訊息：${notification.message || notify.message || "無"}
-            </div>
-          `
-        );
+      if (stageName === "planning") {
+        return data.production_decision || data.plan
+          ? (data.plan?.plan_status === "ready" ? "success" : "failed")
+          : "pending";
       }
 
-      resultDiv.innerHTML = html;
+      if (stageName === "execution") {
+        return data.execution_result
+          ? (data.execution_result.execution_status === "completed" ? "success" : "failed")
+          : "pending";
+      }
+
+      if (stageName === "notify") {
+        return data.notify_result
+          ? (data.notify_result.notify_status === "sent" ? "success" : "failed")
+          : "pending";
+      }
+
+      return "pending";
     }
 
-    function renderOrderInfo(data) {
-      const orderInfo = document.getElementById("orderInfo");
+    function renderAgentFlow(data) {
+      const steps = [
+        ["order", "OrderIntake", "理解訂單"],
+        ["resource", "Resource", "檢查資源"],
+        ["planning", "Planning", "Agent 決策與設備分派"],
+        ["execution", "Execution", "呼叫設備"],
+        ["notify", "Notify", "通知結果"]
+      ];
 
-      if (!data || !data.order_id) {
-        orderInfo.innerHTML = "尚未送出訂單";
+      document.getElementById("agentFlow").innerHTML = steps.map(([key, name, desc]) => {
+        const status = stageStatus(data, key);
+        const label = status === "success" ? "完成" : status === "failed" ? "異常" : "等待";
+        const type = status === "success" ? "ok" : status === "failed" ? "fail" : "wait";
+
+        return `
+          <div class="agent-step ${status}">
+            <div>
+              <div class="agent-name">${name}</div>
+              <div class="agent-desc">${desc}</div>
+            </div>
+            ${pill(label, type)}
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderDemoStatus(data) {
+      const inventory = data.inventory || [];
+      const robotServer = data.robot_server || {};
+      const deviceState = robotServer.device_state || {};
+
+      document.getElementById("inventoryList").innerHTML = inventory.length > 0
+        ? inventory.map(item => `
+          <div class="row">
+            <strong>${item.item_name}</strong>
+            ${pill(`${item.stock_qty} ${item.unit}`, Number(item.stock_qty) > 0 ? "ok" : "fail")}
+          </div>
+        `).join("")
+        : `<div class="row"><strong>無庫存資料</strong>${pill("Unknown")}</div>`;
+
+      renderDeviceState(deviceState, robotServer.message);
+
+      document.getElementById("resourceBadge").outerHTML =
+        `<span id="resourceBadge" class="pill ok">Ready</span>`;
+    }
+
+    function renderDeviceState(deviceState, fallbackMessage = "未連線") {
+      document.getElementById("deviceList").innerHTML = Object.keys(deviceState || {}).length > 0
+        ? Object.entries(deviceState).map(([deviceId, status]) => `
+          <div class="equipment">
+            <div class="equipment-name">${deviceId}</div>
+            ${pill(statusLabel(status), deviceType(status))}
+          </div>
+        `).join("")
+        : `<div class="equipment"><div class="equipment-name">Robot Server</div>${pill(fallbackMessage, "fail")}</div>`;
+    }
+
+    async function loadDemoStatus() {
+      try {
+        const res = await fetch("/demo/status");
+        const data = await res.json();
+        renderDemoStatus(data);
+      } catch (err) {
+        document.getElementById("resourceBadge").outerHTML =
+          `<span id="resourceBadge" class="pill fail">Error</span>`;
+        document.getElementById("deviceList").innerHTML = `
+          <div class="equipment">
+            <div class="equipment-name">讀取失敗</div>
+            ${pill(err.message, "fail")}
+          </div>
+        `;
+      }
+    }
+
+    function setUiMode(mode) {
+      const isBatch = mode === "batch";
+      document.getElementById("singleDecisionSection")?.classList.toggle("hidden", isBatch);
+      document.getElementById("singleAgentFlowCard")?.classList.toggle("hidden", isBatch);
+      document.getElementById("batchDecisionSection")?.classList.toggle("hidden", !isBatch);
+    }
+
+    function renderBatchAlert(data) {
+      const banner = document.getElementById("alertBanner");
+      const title = document.getElementById("alertTitle");
+      const message = document.getElementById("alertMessage");
+      const icon = banner.querySelector(".alert-icon");
+      const summary = data?.batch_summary || {};
+
+      banner.className = "alert-banner";
+
+      if (!data || data.success === false) {
+        banner.classList.add("failed");
+        icon.textContent = "!";
+        title.textContent = "Batch Agent 判斷失敗";
+        message.textContent = data?.message || data?.batch_decision_reason || "多筆訂單決策失敗，請檢查後端錯誤。";
         return;
       }
 
-      orderInfo.innerHTML = `
-        <div>訂單 ID：<strong>${data.order_id}</strong></div>
-        <div>
-          狀態：
-          ${
-            data.success
-              ? '<span class="status-success">完成</span>'
-              : '<span class="status-failed">失敗</span>'
-          }
+      banner.classList.add("success");
+      icon.textContent = "✓";
+      title.textContent = "Batch Agent 已完成多筆訂單決策";
+      message.textContent = summary.summary || data.batch_decision_reason || "已完成多筆訂單排序、設備分配與異常分流。";
+    }
+
+    function renderAlert(data) {
+      const banner = document.getElementById("alertBanner");
+      const title = document.getElementById("alertTitle");
+      const message = document.getElementById("alertMessage");
+      const icon = banner.querySelector(".alert-icon");
+
+      const notify = data?.notify_result || {};
+      const internalAlerts = notify.internal_alerts || [];
+      const decision = data?.production_decision || {};
+      const assessment = data?.resource_assessment || {};
+
+      banner.className = "alert-banner";
+
+      if (!data) {
+        icon.textContent = "i";
+        title.textContent = "目前沒有異常";
+        message.textContent = "若庫存不足、設備故障或 SOP 不完整，會直接顯示在這裡。";
+        return;
+      }
+
+      if (data.success === true) {
+        banner.classList.add("success");
+        icon.textContent = "✓";
+        title.textContent = "Agent 判斷：可以自動製作";
+        message.textContent =
+          decision.decision_reason ||
+          assessment.recommendation ||
+          data.message ||
+          "訂單已完成，無需人工介入。";
+        return;
+      }
+
+      banner.classList.add("failed");
+      icon.textContent = "!";
+      title.textContent = "Agent 判斷：需要人工處理";
+      message.textContent = internalAlerts.length > 0
+        ? internalAlerts.map(alert => `${alert.target_role || "相關人員"}：${alert.message || "請協助處理"}`).join(" / ")
+        : (
+            decision.decision_reason ||
+            assessment.recommendation ||
+            data.reason ||
+            data.message ||
+            "流程發生異常，請查看失敗階段。"
+          );
+    }
+
+    function renderDecisionCards(data) {
+      const container = document.getElementById("decisionCards");
+
+      if (!data) {
+        container.innerHTML = `
+          <div class="decision-card">
+            <div class="decision-title">
+              <strong>OrderIntakeAgent</strong>
+              ${pill("等待", "wait")}
+            </div>
+            <div class="small-text">整理顧客需求與偏好。</div>
+          </div>
+
+          <div class="decision-card">
+            <div class="decision-title">
+              <strong>ResourceAssessmentAgent</strong>
+              ${pill("等待", "wait")}
+            </div>
+            <div class="small-text">判斷現場能不能做。</div>
+          </div>
+
+          <div class="decision-card">
+            <div class="decision-title">
+              <strong>ProductionPlanningAgent</strong>
+              ${pill("等待", "wait")}
+            </div>
+            <div class="small-text">決定自動執行或轉人工。</div>
+          </div>
+
+          <div class="decision-card">
+            <div class="decision-title">
+              <strong>Equipment / Notify</strong>
+              ${pill("等待", "wait")}
+            </div>
+            <div class="small-text">顯示設備與通知結果。</div>
+          </div>
+        `;
+        return;
+      }
+
+      const orderContext = data.order_context || {};
+      const dq = data.data_query_result || {};
+      const inventory = dq.inventory_check || {};
+      const equipment = dq.equipment_check || {};
+      const sop = dq.sop_check || {};
+      const assessment = data.resource_assessment || {};
+      const decision = data.production_decision || {};
+      const plan = data.plan || {};
+      const execution = data.execution_result || {};
+      const notify = data.notify_result || {};
+      const selected = plan.selected_equipment || {};
+      const tasks = plan.tasks || [];
+      const internalAlerts = notify.internal_alerts || [];
+
+      const canProduce = assessment.can_produce === true;
+      const hasPlan = plan.plan_status === "ready";
+      const autoExecute = decision.decision_type === "auto_execute";
+      const executionCompleted = execution.execution_status === "completed";
+
+      container.innerHTML = `
+        <div class="decision-card ${orderContext.order_type ? "highlight" : ""}">
+          <div class="decision-title">
+            <strong>OrderIntakeAgent</strong>
+            ${pill(orderContext.order_type ? "已理解" : "未產生", orderContext.order_type ? "ok" : "wait")}
+          </div>
+
+          <div class="kv">
+            <div class="kv-row">
+              <div class="kv-label">優先權</div>
+              <div class="kv-value">${orderContext.priority || "normal"}</div>
+            </div>
+            <div class="kv-row">
+              <div class="kv-label">偏好意圖</div>
+              <div class="kv-value">${joinList(orderContext.preference_intent, "無特殊偏好")}</div>
+            </div>
+            <div class="kv-row">
+              <div class="kv-label">製作目標</div>
+              <div class="kv-value">${orderContext.production_goal || "未產生"}</div>
+            </div>
+          </div>
+
+          <div class="reason-box">
+            Agent 將「${data.preference || "無偏好"}」整理成後續可使用的製作目標，而不是只跑固定流程。
+          </div>
         </div>
-        <div class="small-text">
-          ${data.message || data.reason || ""}
+
+        <div class="decision-card ${assessment.resource_status ? "highlight" : ""}">
+          <div class="decision-title">
+            <strong>ResourceAssessmentAgent</strong>
+            ${resourceStatusLabel(assessment.resource_status)}
+          </div>
+
+          <div class="kv">
+            <div class="kv-row">
+              <div class="kv-label">可製作</div>
+              <div class="kv-value">${booleanLabel(assessment.can_produce)}</div>
+            </div>
+            <div class="kv-row">
+              <div class="kv-label">庫存</div>
+              <div class="kv-value">${inventory.message || "未查詢"}</div>
+            </div>
+            <div class="kv-row">
+              <div class="kv-label">設備</div>
+              <div class="kv-value">${equipment.message || "未查詢"}</div>
+            </div>
+            <div class="kv-row">
+              <div class="kv-label">SOP</div>
+              <div class="kv-value">${sop.message || "未查詢"}</div>
+            </div>
+          </div>
+
+          <div class="reason-box">
+            ${assessment.recommendation || "尚未產生資源狀態建議。"}
+          </div>
+        </div>
+
+        <div class="decision-card ${decision.decision_type ? "highlight" : ""}">
+          <div class="decision-title">
+            <strong>ProductionPlanningAgent</strong>
+            ${decisionTypeLabel(decision.decision_type)}
+          </div>
+
+          <div class="kv">
+            <div class="kv-row">
+              <div class="kv-label">決策</div>
+              <div class="kv-value">${decision.decision_type || "未決策"}</div>
+            </div>
+            <div class="kv-row">
+              <div class="kv-label">人工介入</div>
+              <div class="kv-value">${booleanLabel(decision.requires_human_intervention)}</div>
+            </div>
+            <div class="kv-row">
+              <div class="kv-label">顧客影響</div>
+              <div class="kv-value">${decision.customer_impact || "未判斷"}</div>
+            </div>
+            <div class="kv-row">
+              <div class="kv-label">任務數</div>
+              <div class="kv-value">${tasks.length} 個</div>
+            </div>
+          </div>
+
+          <div class="reason-box">
+            ${decision.decision_reason || plan.reason || "尚未產生決策原因。"}
+          </div>
+        </div>
+
+        <div class="decision-card ${execution.execution_status ? "highlight" : ""}">
+          <div class="decision-title">
+            <strong>Equipment / Notify</strong>
+            ${executionCompleted ? pill("已執行", "ok") : execution.execution_status === "skipped" ? pill("跳過執行", "wait") : execution.execution_status === "failed" ? pill("執行失敗", "fail") : pill("等待", "wait")}
+          </div>
+
+          <div class="kv">
+            <div class="kv-row">
+              <div class="kv-label">炸鍋</div>
+              <div class="kv-value">${selected.fryer || "未選擇"}</div>
+            </div>
+            <div class="kv-row">
+              <div class="kv-label">手臂</div>
+              <div class="kv-value">${selected.robot_arm || "未選擇"}</div>
+            </div>
+            <div class="kv-row">
+              <div class="kv-label">執行狀態</div>
+              <div class="kv-value">${execution.execution_status || "未執行"}</div>
+            </div>
+            <div class="kv-row">
+              <div class="kv-label">內部通知</div>
+              <div class="kv-value">${internalAlerts.length > 0 ? `${internalAlerts.length} 筆` : "無"}</div>
+            </div>
+          </div>
+
+          <div class="reason-box">
+            ${execution.message || notify.message || "尚未產生設備執行或通知結果。"}
+          </div>
         </div>
       `;
     }
 
-    async function loadLogs(orderId) {
-      const logsDiv = document.getElementById("logs");
+    function renderTaskSummary(plan) {
+      const tasks = plan.tasks || [];
 
-      if (!orderId) {
-        logsDiv.innerHTML = "尚無 logs";
-        return;
+      if (tasks.length === 0) {
+        return "未產生設備任務";
       }
 
-      try {
-        const res = await fetch(`/orders/${orderId}/logs`);
-        const data = await res.json();
-        const logs = data.logs || [];
+      return tasks
+        .map(task => `${task.task_id || ""}:${task.device || "未指定"}→${task.action || ""}`)
+        .join(" / ");
+    }
 
-        if (logs.length === 0) {
-          logsDiv.innerHTML = `<div class="empty">目前沒有執行紀錄</div>`;
-          return;
-        }
+    function renderDashboard(data) {
+      renderAgentFlow(data);
+      renderAlert(data);
+      renderDecisionCards(data);
 
-        logsDiv.innerHTML = `
-          <table class="log-table">
-            <thead>
-              <tr>
-                <th>Agent</th>
-                <th>Action</th>
-                <th>Status</th>
-                <th>Message</th>
-                <th>Time</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${logs.map(log => `
-                <tr>
-                  <td>${log.agent_name || ""}</td>
-                  <td>${log.action || ""}</td>
-                  <td>
-                    <span class="${log.status === "success" ? "status-success" : "status-failed"}">
-                      ${log.status || ""}
-                    </span>
-                  </td>
-                  <td>${log.message || ""}</td>
-                  <td>${log.created_at || ""}</td>
-                </tr>
-              `).join("")}
-            </tbody>
-          </table>
-        `;
-      } catch (err) {
-        logsDiv.innerHTML = `
-          <span class="status-failed">
-            讀取 logs 失敗：${err.message}
-          </span>
-        `;
+      if (!data) return;
+
+      const dq = data.data_query_result || {};
+      const inventory = dq.inventory_check || {};
+      const equipment = dq.equipment_check || {};
+      const assessment = data.resource_assessment || {};
+      const decision = data.production_decision || {};
+      const plan = data.plan || {};
+      const execution = data.execution_result || {};
+      const notify = data.notify_result || {};
+      const notification = notify.notification || {};
+      const selected = plan.selected_equipment || {};
+
+      if (data.success === true) {
+        setSystemBadge("success", "流程完成");
+        setStatus("orderStatus", "完成", "ok");
+      } else {
+        setSystemBadge("failed", "需要處理");
+        setStatus("orderStatus", "異常", "fail");
       }
+
+      setText(
+        "orderDetail",
+        `${data.order_id || "無訂單編號"}｜${data.message || data.reason || "無訊息"}`
+      );
+
+      if (assessment.resource_status) {
+        const statusClass = assessment.can_produce ? "ok" : "fail";
+        const statusText = assessment.can_produce ? "可製作" : "不可製作";
+        setStatus("inventoryStatus", statusText, statusClass);
+        setText(
+          "inventoryDetail",
+          assessment.recommendation ||
+          inventory.message ||
+          "已完成資源狀態"
+        );
+      } else if (dq.inventory_check) {
+        setStatus("inventoryStatus", inventory.success ? "正常" : "異常", inventory.success ? "ok" : "fail");
+        setText("inventoryDetail", inventory.message || "已完成庫存查詢");
+      } else {
+        setStatus("inventoryStatus", "未評估", "muted");
+      }
+
+      if (decision.decision_type) {
+        const isAuto = decision.decision_type === "auto_execute";
+        setStatus("decisionStatus", isAuto ? "自動執行" : "轉人工", isAuto ? "ok" : "fail");
+        setText(
+          "decisionDetail",
+          decision.decision_reason ||
+          plan.reason ||
+          "已產生Agent 決策"
+        );
+      } else {
+        setStatus("decisionStatus", "未決策", "muted");
+      }
+
+      if (data.notify_result) {
+        setStatus(
+          "notifyStatus",
+          notify.notify_status === "sent" ? "已通知" : "通知異常",
+          notify.notify_status === "sent" ? "ok" : "fail"
+        );
+        setText(
+          "notifyDetail",
+          notification.message || notify.message || "已產生通知結果"
+        );
+      } else {
+        setStatus("notifyStatus", "未通知", "muted");
+      }
+
+      document.getElementById("selectedFryer").outerHTML =
+        `<span id="selectedFryer" class="pill ${selected.fryer ? "ok" : ""}">${selected.fryer || "未選擇"}</span>`;
+
+      document.getElementById("selectedArm").outerHTML =
+        `<span id="selectedArm" class="pill ${selected.robot_arm ? "ok" : ""}">${selected.robot_arm || "未選擇"}</span>`;
+
+      if (equipment.device_state) {
+        renderDeviceState(equipment.device_state);
+        document.getElementById("resourceBadge").outerHTML =
+          `<span id="resourceBadge" class="pill ok">Updated</span>`;
+      }
+
+      const taskSummary = renderTaskSummary(plan);
+      const reason =
+        decision.decision_reason ||
+        assessment.recommendation ||
+        plan.reason ||
+        data.reason ||
+        data.message ||
+        "尚無決策說明";
+
+      document.getElementById("decisionSummary").textContent =
+        `決策摘要：${reason}｜${taskSummary}`;
+
+      const workflowType = data.success ? "ok" : "fail";
+      const workflowText = data.success ? "Completed" : "Need Action";
+      document.getElementById("workflowBadge").outerHTML =
+        `<span id="workflowBadge" class="pill ${workflowType}">${workflowText}</span>`;
+
+      const decisionBadgeType = decision.decision_type === "auto_execute" ? "ok" : decision.decision_type ? "fail" : "wait";
+      const decisionBadgeText = decision.decision_type === "auto_execute"
+        ? "Auto Execute"
+        : decision.decision_type
+          ? "Escalation"
+          : "Waiting";
+
+      document.getElementById("decisionBadge").outerHTML =
+        `<span id="decisionBadge" class="pill ${decisionBadgeType}">${decisionBadgeText}</span>`;
     }
 
     async function setScenario(apiPath) {
       const scenarioMessage = document.getElementById("scenarioMessage");
 
       try {
-        scenarioMessage.innerHTML = `
-          <span class="status-pending">正在切換情境...</span>
-        `;
-
-        const res = await fetch(apiPath, {
-          method: "POST"
-        });
-
+        scenarioMessage.innerHTML = `<span class="wait">正在切換情境...</span>`;
+        const res = await fetch(apiPath, { method: "POST" });
         const data = await res.json();
 
-        if (data.success) {
-          scenarioMessage.innerHTML = `
-            <span class="status-success">${data.message}</span>
-          `;
-        } else {
-          scenarioMessage.innerHTML = `
-            <span class="status-failed">情境切換失敗</span>
-          `;
-        }
+        scenarioMessage.innerHTML = data.success
+          ? `<span class="ok">${data.message}</span>`
+          : `<span class="fail">測試情境失敗</span>`;
 
         await loadDemoStatus();
       } catch (err) {
-        scenarioMessage.innerHTML = `
-          <span class="status-failed">
-            情境切換錯誤：${err.message}
-          </span>
-        `;
+        scenarioMessage.innerHTML = `<span class="fail">測試情境錯誤：${err.message}</span>`;
       }
     }
+    function batchDecisionPill(decision) {
+      if (decision === "auto_execute") return pill("自動製作", "ok");
+      if (decision === "wait_equipment") return pill("等待設備", "wait");
+      if (decision === "escalate_inventory") return pill("通知補貨", "fail");
+      if (decision === "escalate_sop") return pill("補 SOP", "fail");
+      if (decision === "escalate_equipment") return pill("通知維修", "fail");
+      if (decision === "manual_review") return pill("人工覆核", "wait");
+      return pill(decision || "未決策");
+    }
 
-    async function loadDemoStatus() {
-      const demoStatus = document.getElementById("demoStatus");
+    function batchCardClass(decision) {
+      if (decision === "auto_execute") return "auto";
+      if (decision === "wait_equipment") return "wait";
+      return "fail";
+    }
 
-      try {
-        const res = await fetch("/demo/status");
-        const data = await res.json();
+    function renderBatchDecision(data) {
+      const badge = document.getElementById("batchBadge");
+      const summaryDiv = document.getElementById("batchSummary");
+      const ordersDiv = document.getElementById("batchOrders");
 
-        const inventory = data.inventory || [];
-        const robotServer = data.robot_server || {};
-        const deviceState = robotServer.device_state || {};
-        const robotServerUrl = data.robot_server_url || "";
+      renderBatchAlert(data);
 
-        const inventoryHtml = inventory.length > 0
-          ? inventory.map(item => {
-              return `${item.item_name}：${item.stock_qty} ${item.unit}`;
-            }).join("<br>")
-          : "無庫存資料";
-
-        const deviceHtml = Object.keys(deviceState).length > 0
-          ? Object.entries(deviceState).map(([deviceId, status]) => {
-              return `
-                <div class="device-pill">
-                  <strong>${deviceId}</strong><br>
-                  ${deviceBadge(status)}
-                </div>
-              `;
-            }).join("")
-          : `<span class="status-failed">${robotServer.message || "沒有取得 Robot Server 設備狀態"}</span>`;
-
-        demoStatus.innerHTML = `
-          <div style="margin-top:8px;">
-            <strong>目前庫存</strong><br>
-            ${inventoryHtml}
+      if (!data || data.success === false || !data.orders || data.orders.length === 0) {
+        badge.outerHTML = `<span id="batchBadge" class="pill fail">Error</span>`;
+        summaryDiv.innerHTML = `
+          <div class="reason-box">
+            <strong>Batch 決策失敗：</strong><br />
+            ${data?.message || data?.batch_decision_reason || data?.batch_summary?.summary || "批次決策失敗，請檢查後端錯誤。"}
           </div>
+        `;
+        ordersDiv.innerHTML = "";
+        return;
+      }
 
-          <div style="margin-top:12px;">
-            <strong>Robot Server</strong><br>
-            <span class="small-text">${robotServerUrl}</span>
+      const summary = data.batch_summary || {};
+      const orders = data.orders || [];
+      const equipment = data.equipment_snapshot || {};
+      const selectedOrder = summary.selected_order_for_execution || "無";
+
+      const autoCount = orders.filter(order => order.decision === "auto_execute").length;
+      const waitCount = orders.filter(order => order.decision === "wait_equipment").length;
+      const escalationCount = orders.filter(order => String(order.decision || "").startsWith("escalate") || order.decision === "manual_review").length;
+
+      badge.outerHTML = `<span id="batchBadge" class="pill ok">Decision Ready</span>`;
+
+      summaryDiv.innerHTML = `
+        <div class="batch-summary-grid">
+          <div class="summary-tile">
+            <span class="summary-label">總訂單</span>
+            <strong>${orders.length}</strong>
           </div>
+          <div class="summary-tile ok-tile">
+            <span class="summary-label">可自動製作</span>
+            <strong>${autoCount}</strong>
+          </div>
+          <div class="summary-tile wait-tile">
+            <span class="summary-label">等待設備</span>
+            <strong>${waitCount}</strong>
+          </div>
+          <div class="summary-tile fail-tile">
+            <span class="summary-label">需人工處理</span>
+            <strong>${escalationCount}</strong>
+          </div>
+        </div>
 
-          <div style="margin-top:12px;">
-            <strong>Robot Server 即時設備狀態</strong>
-            <div class="device-grid" style="margin-top:8px;">
-              ${deviceHtml}
+        <div class="reason-box compact-reason">
+          <strong>優先建議執行：</strong>${selectedOrder}<br />
+          <strong>決策理由：</strong>${data.batch_decision_reason || summary.summary || "無"}<br />
+          <strong>可用設備：</strong>炸鍋 ${(equipment.available_fryers || []).join("、") || "無"}｜手臂 ${(equipment.available_robot_arms || []).join("、") || "無"}
+        </div>
+      `;
+
+      ordersDiv.innerHTML = orders.map(order => {
+        const assigned = order.assigned_equipment || {};
+        const alert = order.internal_alert || {};
+        const priorityType = order.priority === "high" ? "wait" : "";
+
+        return `
+          <div class="batch-order-card ${batchCardClass(order.decision)}">
+            <div class="batch-order-title">
+              <span>${order.order_id || ""}｜${order.item_name || ""} × ${order.quantity || 1}</span>
+              ${batchDecisionPill(order.decision)}
             </div>
+
+            <div class="batch-meta">
+              ${pill(`顧客 ${order.customer_id || ""}`)}
+              ${pill(`優先權 ${order.priority || "normal"}`, priorityType)}
+              ${assigned.fryer ? pill(`炸鍋 ${assigned.fryer}`, "ok") : ""}
+              ${assigned.robot_arm ? pill(`手臂 ${assigned.robot_arm}`, "ok") : ""}
+            </div>
+
+            <div class="batch-order-reason">
+              <strong>決策理由：</strong>${order.decision_reason || "無"}
+            </div>
+
+            <div class="batch-order-reason slim-line">
+              <strong>庫存：</strong>${order.inventory_check?.message || "未查詢"} ｜
+              <strong>SOP：</strong>${order.sop_check?.message || "未查詢"}
+            </div>
+
+            ${alert && alert.message ? `
+              <div class="batch-order-reason slim-line">
+                <strong>內部通知：</strong>${alert.target_role || "相關人員"}｜${alert.message}
+              </div>
+            ` : ""}
           </div>
         `;
-      } catch (err) {
-        demoStatus.innerHTML = `
-          <span class="status-failed">
-            讀取 demo 狀態失敗：${err.message}
-          </span>
-        `;
+      }).join("");
+    }
+
+    let orderInputCounter = 0;
+
+    function getItemOptions(selectedValue = "雞排") {
+      const items = ["雞排", "薯條", "雞塊", "甜不辣", "不存在品項"];
+
+      return items.map(item => {
+        const selected = item === selectedValue ? "selected" : "";
+        return `<option value="${item}" ${selected}>${item}</option>`;
+      }).join("");
+    }
+
+    function updateOrderModeBadge() {
+      const badge = document.getElementById("orderModeBadge");
+      const rows = document.querySelectorAll(".order-input-card");
+      const count = rows.length;
+
+      if (count <= 1) {
+        badge.outerHTML = `<span id="orderModeBadge" class="pill wait">Single Agent</span>`;
+      } else {
+        badge.outerHTML = `<span id="orderModeBadge" class="pill purple">Batch Agent｜${count} 筆</span>`;
       }
     }
 
-    async function submitOrder() {
-      const submitBtn = document.getElementById("submitBtn");
-      const loadingBox = document.getElementById("loadingBox");
-      const rawJson = document.getElementById("rawJson");
+    function addOrderInput(defaultOrder = null) {
+      orderInputCounter += 1;
 
-      const payload = {
-        customer_id: document.getElementById("customerId").value,
-        item_name: document.getElementById("itemName").value,
-        quantity: Number(document.getElementById("quantity").value),
-        preference: document.getElementById("preference").value
+      const order = defaultOrder || {
+        customer_id: `C${String(orderInputCounter).padStart(3, "0")}`,
+        item_name: "雞排",
+        quantity: 1,
+        preference: orderInputCounter === 1 ? "酥一點" : ""
       };
 
-      submitBtn.disabled = true;
-      loadingBox.style.display = "block";
+      const orderInputList = document.getElementById("orderInputList");
 
-      document.getElementById("summary").innerHTML = `
-        <span class="status-pending">執行中...</span>
+      const wrapper = document.createElement("div");
+      wrapper.className = "order-input-card";
+      wrapper.dataset.orderInputId = String(orderInputCounter);
+
+      wrapper.innerHTML = `
+        <div class="order-input-header">
+          <strong>訂單 ${orderInputCounter}</strong>
+          <button type="button" class="mini-remove-btn" onclick="removeOrderInput(this)">
+            移除
+          </button>
+        </div>
+
+        <label>顧客 ID</label>
+        <input class="order-customer-id" value="${order.customer_id}" />
+
+        <label>品項</label>
+        <select class="order-item-name">
+          ${getItemOptions(order.item_name)}
+        </select>
+
+        <label>數量</label>
+        <input class="order-quantity" type="number" value="${order.quantity}" min="1" />
+
+        <label>顧客偏好</label>
+        <input class="order-preference" value="${order.preference}" />
       `;
-      document.getElementById("workflowResult").innerHTML = "";
-      document.getElementById("logs").innerHTML = "等待執行完成後讀取 logs...";
+
+      orderInputList.appendChild(wrapper);
+      updateOrderModeBadge();
+    }
+
+    function removeOrderInput(button) {
+      const rows = document.querySelectorAll(".order-input-card");
+
+      if (rows.length <= 1) {
+        alert("至少要保留一筆訂單。");
+        return;
+      }
+
+      button.closest(".order-input-card").remove();
+      updateOrderModeBadge();
+    }
+
+    function collectOrdersFromInputs() {
+      const rows = document.querySelectorAll(".order-input-card");
+
+      return Array.from(rows).map(row => {
+        return {
+          customer_id: row.querySelector(".order-customer-id").value.trim(),
+          item_name: row.querySelector(".order-item-name").value,
+          quantity: Number(row.querySelector(".order-quantity").value),
+          preference: row.querySelector(".order-preference").value.trim()
+        };
+      });
+    }
+
+    function validateOrders(orders) {
+      if (orders.length === 0) {
+        return "至少需要一筆訂單。";
+      }
+
+      for (let i = 0; i < orders.length; i++) {
+        const order = orders[i];
+
+        if (!order.customer_id) {
+          return `第 ${i + 1} 筆訂單缺少顧客 ID。`;
+        }
+
+        if (!order.item_name) {
+          return `第 ${i + 1} 筆訂單缺少品項。`;
+        }
+
+        if (!order.quantity || order.quantity <= 0) {
+          return `第 ${i + 1} 筆訂單數量必須大於 0。`;
+        }
+      }
+
+      return null;
+    }
+
+    function setBatchThinking(orderCount) {
+      const badge = document.getElementById("batchBadge");
+      const summaryDiv = document.getElementById("batchSummary");
+      const ordersDiv = document.getElementById("batchOrders");
+
+      badge.outerHTML = `<span id="batchBadge" class="pill wait">Thinking</span>`;
+      summaryDiv.textContent = `BatchOrderCoordinatorAgent 正在比較 ${orderCount} 筆訂單、庫存、SOP 與設備狀態...`;
+      ordersDiv.innerHTML = "";
+    }
+
+    function clearBatchResultForSingle() {
+      const badge = document.getElementById("batchBadge");
+      const summaryDiv = document.getElementById("batchSummary");
+      const ordersDiv = document.getElementById("batchOrders");
+
+      badge.outerHTML = `<span id="batchBadge" class="pill wait">Single Mode</span>`;
+      summaryDiv.textContent = "目前只有 1 筆訂單，因此使用原本單筆 Agent workflow。";
+      ordersDiv.innerHTML = "";
+    }
+
+    async function submitOrders() {
+      const submitBtn = document.getElementById("submitBtn");
+      const orders = collectOrdersFromInputs();
+      const errorMessage = validateOrders(orders);
+
+      if (errorMessage) {
+        alert(errorMessage);
+        return;
+      }
+
+      submitBtn.disabled = true;
+
+      if (orders.length === 1) {
+        clearBatchResultForSingle();
+        await submitSingleOrder(orders[0]);
+      } else {
+        await submitBatchOrders(orders);
+      }
+
+      submitBtn.disabled = false;
+    }
+
+    async function submitSingleOrder(order) {
+      setUiMode("single");
+      setSystemBadge("pending", "單筆 Workflow 執行中");
+      setStatus("orderStatus", "執行中", "wait");
+      setStatus("inventoryStatus", "評估中", "wait");
+      setStatus("decisionStatus", "決策中", "wait");
+      setStatus("notifyStatus", "等待", "wait");
+
+      setText("orderDetail", "正在執行單筆 Agent、工具與設備模擬...");
+      setText("inventoryDetail", "等待 ResourceAssessmentAgent 回傳資源狀態...");
+      setText("decisionDetail", "等待 ProductionPlanningAgent 產生 Agent 決策...");
+      setText("notifyDetail", "等待通知分流結果...");
+
+      document.getElementById("workflowBadge").outerHTML =
+        `<span id="workflowBadge" class="pill wait">Running</span>`;
+
+      document.getElementById("decisionBadge").outerHTML =
+        `<span id="decisionBadge" class="pill wait">Thinking</span>`;
+
+      renderAgentFlow({ order_id: "running" });
+      renderDecisionCards(null);
 
       try {
         const res = await fetch("/order", {
@@ -858,39 +1147,92 @@
           headers: {
             "Content-Type": "application/json"
           },
-          body: JSON.stringify(payload)
+          body: JSON.stringify(order)
         });
 
         const data = await res.json();
-        lastRawData = data;
-
-        renderOrderInfo(data);
-        renderWorkflow(data);
-
-        rawJson.textContent = JSON.stringify(data, null, 2);
-
-        if (data.order_id) {
-          await loadLogs(data.order_id);
-        }
-
+        renderDashboard(data);
       } catch (err) {
-        document.getElementById("summary").innerHTML = `
-          <span class="status-failed">前端或後端錯誤：</span>
-          ${err.message}
-        `;
-      } finally {
-        submitBtn.disabled = false;
-        loadingBox.style.display = "none";
+        setSystemBadge("failed", "前後端錯誤");
+        setStatus("orderStatus", "錯誤", "fail");
+        setText("orderDetail", err.message);
+        renderAlert({
+          success: false,
+          reason: err.message
+        });
       }
     }
 
-    function toggleRaw() {
-      const rawJson = document.getElementById("rawJson");
-      rawJson.style.display = rawJson.style.display === "none" ? "block" : "none";
+    async function submitBatchOrders(orders) {
+      setUiMode("batch");
+      setSystemBadge("pending", "Batch Agent 決策中");
+      setStatus("orderStatus", "批次決策中", "wait");
+      setStatus("inventoryStatus", "批次評估中", "wait");
+      setStatus("decisionStatus", "協調決策中", "wait");
+      setStatus("notifyStatus", "等待", "wait");
+
+      setText("orderDetail", `已送出 ${orders.length} 筆訂單，交由 BatchOrderCoordinatorAgent 決策。`);
+      setText("inventoryDetail", "正在逐筆查詢庫存與 SOP，並整合設備狀態。");
+      setText("decisionDetail", "正在判斷哪些訂單可自動製作、等待或轉人工。");
+      setText("notifyDetail", "若有異常訂單，會顯示內部通知對象。");
+
+      setBatchThinking(orders.length);
+
+      try {
+        const res = await fetch("/batch-orders", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            scenario: "custom_batch",
+            orders
+          })
+        });
+
+        const data = await res.json();
+        renderBatchDecision(data);
+
+        if (data.success) {
+          setSystemBadge("success", "Batch 決策完成");
+          setStatus("orderStatus", "批次完成", "ok");
+          setStatus("inventoryStatus", "已評估", "ok");
+          setStatus("decisionStatus", "已決策", "ok");
+          setStatus("notifyStatus", "已分流", "ok");
+          setText("orderDetail", data.batch_summary?.summary || "多筆訂單決策完成。");
+          setText("inventoryDetail", data.batch_decision_reason || "已完成批次資源評估。");
+          setText("decisionDetail", `優先建議執行：${data.batch_summary?.selected_order_for_execution || "無"}`);
+          setText("notifyDetail", "異常訂單已顯示對應內部通知對象。");
+        } else {
+          setSystemBadge("failed", "Batch 決策失敗");
+          setStatus("orderStatus", "批次異常", "fail");
+          setStatus("decisionStatus", "決策失敗", "fail");
+          setText("orderDetail", data.message || "多筆訂單決策失敗。");
+        }
+      } catch (err) {
+        document.getElementById("batchBadge").outerHTML =
+          `<span id="batchBadge" class="pill fail">Error</span>`;
+
+        document.getElementById("batchSummary").textContent =
+          `Batch Agent 執行失敗：${err.message}`;
+
+        setSystemBadge("failed", "Batch 前後端錯誤");
+        setStatus("orderStatus", "錯誤", "fail");
+        setText("orderDetail", err.message);
+      }
     }
 
     window.addEventListener("load", () => {
       loadDemoStatus();
+      renderDecisionCards(null);
+      setUiMode("single");
+
+      addOrderInput({
+        customer_id: "C001",
+        item_name: "雞排",
+        quantity: 1,
+        preference: "酥一點"
+      });
     });
   </script>
 </body>

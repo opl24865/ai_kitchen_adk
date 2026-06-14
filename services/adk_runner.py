@@ -15,7 +15,23 @@ APP_NAME = "ai_kitchen_adk_mvp"
 async def run_agent(agent, user_input: dict | str) -> str:
     """
     執行一個 ADK agent，並回傳最後的文字輸出。
-    這個 function 可用於 LlmAgent，也可用於 SequentialAgent root_agent。
+    """
+
+    result = await run_agent_with_state(agent, user_input)
+    return result["final_text"]
+
+
+async def run_agent_with_state(agent, user_input: dict | str) -> dict:
+    """
+    執行一個 ADK agent，並回傳：
+    - final_text
+    - session_state
+
+    session_state 會包含每個 agent 透過 output_key 存入的結果，例如：
+    - data_query_state
+    - planning_state
+    - execution_state
+    - final_workflow_result
     """
 
     session_service = InMemorySessionService()
@@ -58,7 +74,21 @@ async def run_agent(agent, user_input: dict | str) -> str:
             if event.content and event.content.parts:
                 final_text = event.content.parts[0].text or ""
 
-    return final_text
+    # 讀取 ADK session state
+    session = await session_service.get_session(
+        app_name=APP_NAME,
+        user_id=user_id,
+        session_id=session_id,
+    )
+
+    session_state = dict(session.state) if session and session.state else {}
+
+    return {
+        "final_text": final_text,
+        "session_state": session_state,
+        "user_id": user_id,
+        "session_id": session_id,
+    }
 
 
 def safe_json_loads(text: str) -> dict[str, Any]:
@@ -78,7 +108,6 @@ def safe_json_loads(text: str) -> dict[str, Any]:
     if cleaned.endswith("```"):
         cleaned = cleaned[:-3].strip()
 
-    # 如果模型前後多輸出文字，嘗試擷取第一個 JSON object
     start = cleaned.find("{")
     end = cleaned.rfind("}")
 

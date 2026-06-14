@@ -1,0 +1,126 @@
+{
+  "description": "root_agent 最終回傳結果",
+  "raw_output": "Both calls succeeded. Now I'll construct the final output.\n\n```json\n{\n    \"success\": false,\n    \"order_id\": \"ORD-2dce4401\",\n    \"message\": \"訂單因設備不可用已跳過自動執行，已通知顧客與維護人員。\",\n    \"order_context\": {\n        \"order_type\": \"single_item_fried_food\",\n        \"priority\": \"normal\",\n        \"preference_intent\": [\"extra_crispy\"],\n        \"production_goal\": \"炸雞排，酥脆口感\",\n        \"requires_resource_check\": true,\n        \"requires_sop_check\": true,\n        \"requires_equipment_assignment\": true,\n        \"notes\": \"顧客要求酥脆口感，需確認炸油狀態與油炸時間控制。\"\n    },\n    \"data_query_result\": {\n        \"query_status\": \"success\",\n        \"inventory_check\": {\n            \"success\": true,\n            \"item_name\": \"雞排\",\n            \"required_qty\": 1,\n            \"stock_qty\": 10,\n            \"message\": \"雞排庫存足夠\"\n        },\n        \"equipment_check\": {\n            \"success\": false,\n            \"available_equipment\": [\"robot_arm_2\"],\n            \"available_fryers\": [],\n            \"available_robot_arms\": [\"robot_arm_2\"],\n            \"device_state\": {\n                \"fryer_A\": \"maintenance\",\n                \"fryer_B\": \"busy\",\n                \"fryer_C\": \"maintenance\",\n                \"robot_arm_1\": \"maintenance\",\n                \"robot_arm_2\": \"available\"\n            },\n            \"message\": \"目前沒有可用炸鍋\"\n        },\n        \"sop_check\": {\n            \"success\": true,\n            \"sop_id\": \"fried_chicken_cutlet_standard\",\n            \"item_name\": \"雞排\",\n            \"preference_note\": \"依照顧客偏好，炸製時間增加 30 秒\",\n            \"steps\": [\n                {\"step_id\": \"S1\", \"action\": \"preheat_fryer\", \"required_device_type\": \"fryer\", \"duration_sec\": 60},\n                {\"step_id\": \"S2\", \"action\": \"place_food_into_fryer\", \"required_device_type\": \"robot_arm\", \"duration_sec\": 20},\n                {\"step_id\": \"S3\", \"action\": \"fry\", \"required_device_type\": \"fryer\", \"duration_sec\": 210},\n                {\"step_id\": \"S4\", \"action\": \"remove_food_from_fryer\", \"required_device_type\": \"robot_arm\", \"duration_sec\": 20}\n            ],\n            \"message\": \"成功取得 雞排 SOP\"\n        }\n    },\n    \"resource_assessment\": {\n        \"resource_status\": \"equipment_blocked\",\n        \"can_produce\": false,\n        \"blocking_reasons\": [\"目前沒有可用炸鍋（fryer_A maintenance, fryer_B busy, fryer_C maintenance）\"],\n        \"recommendation\": \"請等待 fryer_B 完成當前作業，或安排 fryer_A / fryer_C 維修後再進行生產。目前僅 robot_arm_2 可用。\"\n    },\n    \"production_decision\": {\n        \"decision_type\": \"escalate_equipment\",\n        \"decision_reason\": \"設備檢查失敗，目前無可用炸鍋（所有炸鍋皆處於 maintenance 或 busy 狀態），無法進行生產。\",\n        \"requires_human_intervention\": true,\n        \"customer_impact\": \"delay\"\n    },\n    \"plan\": {\n        \"plan_status\": \"failed\",\n        \"reason\": \"equipment_check.success = false，目前沒有可用炸鍋，無法分派設備與建立生產任務。\",\n        \"selected_equipment\": {},\n        \"tasks\": []\n    },\n    \"execution_result\": {\n        \"execution_status\": \"skipped\",\n        \"results\": [],\n        \"message\": \"plan_status 為 failed，production_decision 為 escalate_equipment，不需要執行設備任務。\"\n    },\n    \"notify_result\": {\n        \"notify_status\": \"sent\",\n        \"notification\": {\n            \"success\": true,\n            \"order_id\": \"ORD-2dce4401\",\n            \"customer_id\": \"C001\",\n            \"message\": \"您好，您的訂單（雞排*1，酥一點）因目前設備（炸鍋）皆在維護或忙碌中，暫時無法立即製作。我們已通知相關人員處理，請您稍候，感謝您的耐心等待。\"\n        },\n        \"internal_alerts\": [\n            {\n                \"success\": true,\n                \"order_id\": \"ORD-2dce4401\",\n                \"alert_type\": \"equipment_unavailable\",\n                \"target_role\": \"maintenance_staff\",\n                \"message\": \"訂單 ORD-2dce4401（雞排*1）因無可用炸鍋無法生產。目前 fryer_A 維護中、fryer_B 忙碌中、fryer_C 維護中，請安排維修或排程以恢復生產。需求：SOP 需使用炸鍋預熱 60 秒及油炸 210 秒。\"\n            }\n        ],\n        \"message\": \"已通知顧客訂單延遲，並已通知維護人員處理設備問題。\"\n    }\n}\n```",
+  "parsed_output": {
+    "success": false,
+    "order_id": "ORD-2dce4401",
+    "message": "訂單因設備不可用已跳過自動執行，已通知顧客與維護人員。",
+    "order_context": {
+      "order_type": "single_item_fried_food",
+      "priority": "normal",
+      "preference_intent": [
+        "extra_crispy"
+      ],
+      "production_goal": "炸雞排，酥脆口感",
+      "requires_resource_check": true,
+      "requires_sop_check": true,
+      "requires_equipment_assignment": true,
+      "notes": "顧客要求酥脆口感，需確認炸油狀態與油炸時間控制。"
+    },
+    "data_query_result": {
+      "query_status": "success",
+      "inventory_check": {
+        "success": true,
+        "item_name": "雞排",
+        "required_qty": 1,
+        "stock_qty": 10,
+        "message": "雞排庫存足夠"
+      },
+      "equipment_check": {
+        "success": false,
+        "available_equipment": [
+          "robot_arm_2"
+        ],
+        "available_fryers": [],
+        "available_robot_arms": [
+          "robot_arm_2"
+        ],
+        "device_state": {
+          "fryer_A": "maintenance",
+          "fryer_B": "busy",
+          "fryer_C": "maintenance",
+          "robot_arm_1": "maintenance",
+          "robot_arm_2": "available"
+        },
+        "message": "目前沒有可用炸鍋"
+      },
+      "sop_check": {
+        "success": true,
+        "sop_id": "fried_chicken_cutlet_standard",
+        "item_name": "雞排",
+        "preference_note": "依照顧客偏好，炸製時間增加 30 秒",
+        "steps": [
+          {
+            "step_id": "S1",
+            "action": "preheat_fryer",
+            "required_device_type": "fryer",
+            "duration_sec": 60
+          },
+          {
+            "step_id": "S2",
+            "action": "place_food_into_fryer",
+            "required_device_type": "robot_arm",
+            "duration_sec": 20
+          },
+          {
+            "step_id": "S3",
+            "action": "fry",
+            "required_device_type": "fryer",
+            "duration_sec": 210
+          },
+          {
+            "step_id": "S4",
+            "action": "remove_food_from_fryer",
+            "required_device_type": "robot_arm",
+            "duration_sec": 20
+          }
+        ],
+        "message": "成功取得 雞排 SOP"
+      }
+    },
+    "resource_assessment": {
+      "resource_status": "equipment_blocked",
+      "can_produce": false,
+      "blocking_reasons": [
+        "目前沒有可用炸鍋（fryer_A maintenance, fryer_B busy, fryer_C maintenance）"
+      ],
+      "recommendation": "請等待 fryer_B 完成當前作業，或安排 fryer_A / fryer_C 維修後再進行生產。目前僅 robot_arm_2 可用。"
+    },
+    "production_decision": {
+      "decision_type": "escalate_equipment",
+      "decision_reason": "設備檢查失敗，目前無可用炸鍋（所有炸鍋皆處於 maintenance 或 busy 狀態），無法進行生產。",
+      "requires_human_intervention": true,
+      "customer_impact": "delay"
+    },
+    "plan": {
+      "plan_status": "failed",
+      "reason": "equipment_check.success = false，目前沒有可用炸鍋，無法分派設備與建立生產任務。",
+      "selected_equipment": {},
+      "tasks": []
+    },
+    "execution_result": {
+      "execution_status": "skipped",
+      "results": [],
+      "message": "plan_status 為 failed，production_decision 為 escalate_equipment，不需要執行設備任務。"
+    },
+    "notify_result": {
+      "notify_status": "sent",
+      "notification": {
+        "success": true,
+        "order_id": "ORD-2dce4401",
+        "customer_id": "C001",
+        "message": "您好，您的訂單（雞排*1，酥一點）因目前設備（炸鍋）皆在維護或忙碌中，暫時無法立即製作。我們已通知相關人員處理，請您稍候，感謝您的耐心等待。"
+      },
+      "internal_alerts": [
+        {
+          "success": true,
+          "order_id": "ORD-2dce4401",
+          "alert_type": "equipment_unavailable",
+          "target_role": "maintenance_staff",
+          "message": "訂單 ORD-2dce4401（雞排*1）因無可用炸鍋無法生產。目前 fryer_A 維護中、fryer_B 忙碌中、fryer_C 維護中，請安排維修或排程以恢復生產。需求：SOP 需使用炸鍋預熱 60 秒及油炸 210 秒。"
+        }
+      ],
+      "message": "已通知顧客訂單延遲，並已通知維護人員處理設備問題。"
+    }
+  }
+}

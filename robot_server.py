@@ -26,11 +26,11 @@ class DeviceTaskRequest(BaseModel):
 
 
 device_state = {
-    "fryer_A": "maintenance",
-    "fryer_B": "available",
-    "fryer_C": "busy",
+    "fryer_A": "available",
+    "fryer_B": "busy",
+    "fryer_C": "available",
     "robot_arm_1": "available",
-    "robot_arm_2": "busy"
+    "robot_arm_2": "available"
 }
 
 

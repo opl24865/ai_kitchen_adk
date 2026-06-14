@@ -1,0 +1,62 @@
+{
+    "雞排": {
+      "sop_id": "fried_chicken_cutlet_standard",
+      "item_name": "雞排",
+      "base_fry_time": 180,
+      "preheat_time": 60,
+      "place_time": 20,
+      "remove_time": 20,
+      "preference_rules": {
+        "酥": {
+          "fry_time_delta": 30,
+          "note": "依照顧客偏好，炸製時間增加 30 秒"
+        },
+        "少油": {
+          "fry_time_delta": -10,
+          "note": "依照顧客偏好，炸製時間減少 10 秒"
+        }
+      }
+    },
+    "薯條": {
+      "sop_id": "fried_fries_standard",
+      "item_name": "薯條",
+      "base_fry_time": 150,
+      "preheat_time": 45,
+      "place_time": 15,
+      "remove_time": 15,
+      "preference_rules": {
+        "酥": {
+          "fry_time_delta": 20,
+          "note": "依照顧客偏好，薯條炸製時間增加 20 秒"
+        }
+      }
+    },
+    "雞塊": {
+      "sop_id": "fried_nuggets_standard",
+      "item_name": "雞塊",
+      "base_fry_time": 160,
+      "preheat_time": 50,
+      "place_time": 15,
+      "remove_time": 15,
+      "preference_rules": {
+        "酥": {
+          "fry_time_delta": 20,
+          "note": "依照顧客偏好，雞塊炸製時間增加 20 秒"
+        }
+      }
+    },
+    "甜不辣": {
+  "sop_id": "fried_tempura_standard",
+  "item_name": "甜不辣",
+  "base_fry_time": 140,
+  "preheat_time": 45,
+  "place_time": 15,
+  "remove_time": 15,
+  "preference_rules": {
+    "酥": {
+      "fry_time_delta": 20,
+      "note": "依照顧客偏好，甜不辣炸製時間增加 20 秒"
+    }
+  }
+}
+  }

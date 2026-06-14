@@ -1,0 +1,13 @@
+{
+  "order_id": "ORD-2ad19660",
+  "debug_dir": "debug_runs/ORD-2ad19660",
+  "files": {
+    "workflow_input": "debug_runs/ORD-2ad19660/00_workflow_input.json",
+    "order_intake_agent": "debug_runs/ORD-2ad19660/01_order_intake_agent.json",
+    "resource_assessment_agent": "debug_runs/ORD-2ad19660/02_resource_assessment_agent.json",
+    "production_planning_agent": "debug_runs/ORD-2ad19660/03_production_planning_agent.json",
+    "equipment_execution_agent": "debug_runs/ORD-2ad19660/04_equipment_execution_agent.json",
+    "notification_escalation_agent": "debug_runs/ORD-2ad19660/05_notification_escalation_agent.json",
+    "final_result": "debug_runs/ORD-2ad19660/99_final_result.json"
+  }
+}
