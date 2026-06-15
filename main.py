@@ -40,7 +40,8 @@ class BatchOrderItem(BaseModel):
     item_name: str
     quantity: int = 1
     preference: str = ""
-
+    deadline: str | None = None
+    priority_weight: int | None = None
 
 class BatchOrderRequest(BaseModel):
     scenario: str = "custom_batch"
@@ -80,7 +81,9 @@ async def run_batch_order_decision(batch_input: dict) -> dict:
             "customer_id": order.get("customer_id", f"C{index:03d}"),
             "item_name": order.get("item_name", ""),
             "quantity": int(order.get("quantity", 1)),
-            "preference": order.get("preference", "")
+            "preference": order.get("preference", ""),
+            "deadline": order.deadline,
+            "priority_weight": order.priority_weight
         })
 
     batch_input["orders"] = normalized_orders

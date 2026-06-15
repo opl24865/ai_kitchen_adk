@@ -93,25 +93,48 @@ async def run_agent_with_state(agent, user_input: dict | str) -> dict:
 
 def safe_json_loads(text: str) -> dict[str, Any]:
     """
-    防止模型偶爾輸出 ```json 或額外文字。
-    這裡會盡量抓出第一個 JSON object。
+    從模型輸出中找出最大的合法 JSON object。
+
+    可處理：
+    - Markdown code fence
+    - JSON 前後的說明文字
+    - 模型輸出多個 JSON object
     """
 
     cleaned = text.strip()
 
-    if cleaned.startswith("```json"):
-        cleaned = cleaned.replace("```json", "", 1).strip()
+    if not cleaned:
+        raise ValueError("Agent returned empty output")
 
-    if cleaned.startswith("```"):
-        cleaned = cleaned.replace("```", "", 1).strip()
+    decoder = json.JSONDecoder()
+    candidates = []
 
-    if cleaned.endswith("```"):
-        cleaned = cleaned[:-3].strip()
+    for index, character in enumerate(cleaned):
+        if character != "{":
+            continue
 
-    start = cleaned.find("{")
-    end = cleaned.rfind("}")
+        try:
+            value, end_index = decoder.raw_decode(cleaned[index:])
+        except json.JSONDecodeError:
+            continue
 
-    if start != -1 and end != -1 and end > start:
-        cleaned = cleaned[start:end + 1]
+        if isinstance(value, dict):
+            candidates.append({
+                "value": value,
+                "length": end_index,
+                "start": index,
+            })
 
-    return json.loads(cleaned)
+    if not candidates:
+        raise ValueError(
+            f"Agent output does not contain a valid JSON object: "
+            f"{cleaned[:300]}"
+        )
+
+    # 選擇內容最大的 JSON，避免誤選內層的空物件或前置 {}。
+    largest_candidate = max(
+        candidates,
+        key=lambda candidate: candidate["length"],
+    )
+
+    return largest_candidate["value"]

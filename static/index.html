@@ -890,12 +890,38 @@
       const orders = data.orders || [];
       const equipment = data.equipment_snapshot || {};
       const selectedOrder = summary.selected_order_for_execution || "無";
+      const selectedFryers = [
+        ...new Set(
+          orders
+            .map(order => order.assigned_equipment?.fryer)
+            .filter(Boolean)
+        )
+      ];
+      const selectedArms = [
+        ...new Set(
+          orders
+            .map(order => order.assigned_equipment?.robot_arm)
+            .filter(Boolean)
+        )
+      ];
 
       const autoCount = orders.filter(order => order.decision === "auto_execute").length;
       const waitCount = orders.filter(order => order.decision === "wait_equipment").length;
       const escalationCount = orders.filter(order => String(order.decision || "").startsWith("escalate") || order.decision === "manual_review").length;
 
       badge.outerHTML = `<span id="batchBadge" class="pill ok">Decision Ready</span>`;
+
+      document.getElementById("selectedFryer").outerHTML =
+        `<span id="selectedFryer" class="pill ${selectedFryers.length ? "ok" : ""}">${selectedFryers.join("、") || "未選擇"}</span>`;
+
+      document.getElementById("selectedArm").outerHTML =
+        `<span id="selectedArm" class="pill ${selectedArms.length ? "ok" : ""}">${selectedArms.join("、") || "未選擇"}</span>`;
+
+      if (equipment.device_state) {
+        renderDeviceState(equipment.device_state, equipment.message);
+        document.getElementById("resourceBadge").outerHTML =
+          `<span id="resourceBadge" class="pill ok">Updated</span>`;
+      }
 
       summaryDiv.innerHTML = `
         <div class="batch-summary-grid">
