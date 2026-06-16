@@ -16,12 +16,24 @@ def schedule_batch(
 
     current_time = base_time or datetime.now(timezone.utc)
 
+    # 只有設備和庫存皆有資源，才可進行排序
     ready_orders = [
         order
         for order in orders
         if order.get("resource_status") == "resource_ready"
     ]
 
+    blocked_orders = [
+        deepcopy(order)
+        for order in orders
+        if order.get("resource_status") != "resource_ready"
+    ]
+
+    # 先將訂單進行優先排序，排序流程: 
+    # 1. 有 deadline 的排前面
+    # 2. deadline 越早，排越前面
+    # 3. priority_weight 越高，排越前面
+    # 4. input_sequence 越小，排越前面
     ready_orders.sort(
         key=lambda order: (
             parse_datetime(order.get("deadline")) is None,
@@ -32,9 +44,21 @@ def schedule_batch(
         )
     )
 
+    # 將設備快照轉成 scheduler 用的格式
     device_timeline = build_device_timeline(
         equipment_snapshot=equipment_snapshot,
         base_time=current_time,
+    )
+
+    # 獲得可以使用的設備
+    fryer_ids = get_schedulable_devices(
+        device_timeline,
+        device_type="fryer",
+    )
+
+    robot_arm_ids = get_schedulable_devices(
+        device_timeline,
+        device_type="robot_arm",
     )
 
     scheduled_orders = []
@@ -42,16 +66,6 @@ def schedule_batch(
 
     for order in ready_orders:
         best_candidate = None
-
-        fryer_ids = get_schedulable_devices(
-            device_timeline,
-            device_type="fryer",
-        )
-
-        robot_arm_ids = get_schedulable_devices(
-            device_timeline,
-            device_type="robot_arm",
-        )
 
         if not fryer_ids:
             unscheduled_order = deepcopy(order)
@@ -127,6 +141,7 @@ def schedule_batch(
             candidate=best_candidate,
         )
 
+      
         scheduled_orders.append(scheduled_order)
 
         reserve_candidate(
@@ -138,6 +153,7 @@ def schedule_batch(
         key=lambda order: (
             order.get("planned_start_time") or "",
             order.get("expected_completion_time") or "",
+            -normalize_priority_weight(order),
             order.get("input_sequence", 0),
         )
     )
@@ -164,7 +180,7 @@ def schedule_batch(
     return {
         "success": bool(scheduled_orders),
         "execution_order": execution_order,
-        "orders": scheduled_orders + unscheduled_orders,
+        "orders": scheduled_orders + unscheduled_orders + blocked_orders,
         "device_timeline": serialize_device_timeline(
             device_timeline
         ),
@@ -228,7 +244,11 @@ def simulate_order_schedule(
     不得修改正式的 device_timeline。
     """
 
-    simulated_timeline = deepcopy(device_timeline)
+    simulated_available_at = {
+        device_id: detail["available_at"]
+        for device_id, detail in device_timeline.items()
+    }
+
     scheduled_tasks = []
 
     previous_step_end = base_time
@@ -240,11 +260,12 @@ def simulate_order_schedule(
             robot_arm_id=robot_arm_id,
         )
 
+        # 必須同時滿足:
+        # 1. 前一個 SOP step 已經完成
+        # 2. 這台設備已經空出來 
         step_start = max(
             previous_step_end,
-            simulated_timeline[device_id][
-                "available_at"
-            ],
+            simulated_available_at[device_id],
         )
 
         duration_sec = normalize_duration(
@@ -268,9 +289,7 @@ def simulate_order_schedule(
             "planned_end_time": to_iso(step_end),
         })
 
-        simulated_timeline[device_id][
-            "available_at"
-        ] = step_end
+        simulated_available_at[device_id] = step_end
 
         previous_step_end = step_end
 

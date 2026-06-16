@@ -76,7 +76,7 @@ def to_iso(value: datetime | None):
     return value.isoformat(timespec="seconds")
 
 def remove_expired_reservations(device: dict, current_time: datetime) -> None:
-    device["reservation"] = [
+    device["reservations"] = [
         reservation
         for reservation in device["reservations"]
         if reservation["end_time"] > current_time
